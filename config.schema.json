@@ -1,16 +1,22 @@
 {
-    "pluginAlias": "Teslemetry",
-    "pluginType": "platform",
-    "singular": false,
-    "headerDisplay": "Requires an active subscription to Teslemetry. Please login and create an access token at teslemetry.com",
-    "schema": {
-        "type": "object",
-        "properties": {
-            "accessToken": {
-                "title": "Access Token",
-                "type": "string",
-                "required": true
-            }
-        }
+  "pluginAlias": "Teslemetry",
+  "pluginType": "platform",
+  "singular": false,
+  "headerDisplay": "Requires an active subscription to Teslemetry. Please login and create an access token at teslemetry.com",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "required": true,
+        "default": "Teslemetry"
+      },
+      "accessToken": {
+        "title": "Access Token",
+        "type": "string",
+        "required": true
+      }
     }
+  }
 }

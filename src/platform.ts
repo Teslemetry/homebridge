@@ -9,7 +9,7 @@ import {
 } from "homebridge";
 
 import { PLATFORM_NAME, PLUGIN_NAME } from "./settings.js";
-import { Vehicle } from "./vehicle.js";
+import { VehicleAccessory } from "./vehicle.js";
 
 import { Teslemetry } from "tesla-fleet-api";
 
@@ -72,12 +72,10 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-    this.TeslaFleetApi.products().then((products) => {
-      this.log.info(JSON.stringify(products));
+    this.TeslaFleetApi.products().then((products: any) => {
       for (const product of products.response) {
         // Vehicles
         if ("vin" in product) {
-          this.log.info(JSON.stringify(product));
           const uuid = this.api.hap.uuid.generate(product.vin);
           const existingAccessory = this.accessories.find(
             (accessory) => accessory.UUID === uuid
@@ -87,15 +85,16 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
               "Restoring existing accessory from cache:",
               existingAccessory.displayName
             );
-            new Vehicle(this, existingAccessory);
+            new VehicleAccessory(this, existingAccessory);
           } else {
-            this.log.info("Adding new accessory:", product.vin);
+            this.log.info("Adding new accessory:", product.display_name);
             const accessory = new this.api.platformAccessory(
               product.display_name,
               uuid
             );
-            accessory.context.device = product;
-            new Vehicle(this, accessory);
+            accessory.context.product = product;
+            new VehicleAccessory(this, accessory);
+
             this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
               accessory,
             ]);
