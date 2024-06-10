@@ -39,6 +39,6 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "tesla-fleet-api": "^0.0.7"
+    "tesla-fleet-api": "^0.0.8"
   }
 }

@@ -31,7 +31,7 @@ export class VehicleAccessory {
     }
 
     this.VehicleSpecific = this.platform.TeslaFleetApi.vehicle.specific(
-      this.accessory.context.product.vin
+      this.accessory.context.vin
     );
 
     this.accessory
@@ -39,11 +39,11 @@ export class VehicleAccessory {
       .setCharacteristic(this.platform.Characteristic.Manufacturer, "Tesla")
       .setCharacteristic(
         this.platform.Characteristic.Model,
-        "this.VehicleSpecific.model"
+        this.VehicleSpecific.model
       )
       .setCharacteristic(
         this.platform.Characteristic.SerialNumber,
-        this.accessory.context.product.vin
+        this.accessory.context.vin
       );
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
@@ -67,11 +67,6 @@ export class VehicleAccessory {
       .getCharacteristic(this.platform.Characteristic.On)
       .onSet(this.setOn.bind(this)) // SET - bind to the `setOn` method below
       .onGet(this.getOn.bind(this)); // GET - bind to the `getOn` method below
-
-    // register handlers for the Brightness Characteristic
-    this.service
-      .getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setBrightness.bind(this)); // SET - bind to the 'setBrightness` method below
 
     /**
      * Creating multiple services of the same type.
@@ -143,6 +138,7 @@ export class VehicleAccessory {
   async setOn(value: CharacteristicValue) {
     // implement your own code to turn your device on/off
     this.exampleStates.On = value as boolean;
+    await this.VehicleSpecific.flash_lights();
 
     this.platform.log.debug("Set Characteristic On ->", value);
   }

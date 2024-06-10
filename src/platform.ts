@@ -77,28 +77,35 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
         // Vehicles
         if ("vin" in product) {
           const uuid = this.api.hap.uuid.generate(product.vin);
-          const existingAccessory = this.accessories.find(
+          const cachedAccessory = this.accessories.find(
             (accessory) => accessory.UUID === uuid
           );
-          if (existingAccessory) {
+          if (cachedAccessory) {
+            cachedAccessory.context.state = product.state;
+            cachedAccessory.displayName = product.display_name;
             this.log.info(
               "Restoring existing accessory from cache:",
-              existingAccessory.displayName
+              cachedAccessory.displayName
             );
-            new VehicleAccessory(this, existingAccessory);
-          } else {
-            this.log.info("Adding new accessory:", product.display_name);
-            const accessory = new this.api.platformAccessory(
-              product.display_name,
-              uuid
-            );
-            accessory.context.product = product;
-            new VehicleAccessory(this, accessory);
-
-            this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
-              accessory,
-            ]);
+            new VehicleAccessory(this, cachedAccessory);
+            continue;
           }
+
+          this.log.info("Adding new accessory:", product.display_name);
+          const newAccessory = new this.api.platformAccessory(
+            product.display_name,
+            uuid
+          );
+
+          newAccessory.context.vin = product.vin;
+          newAccessory.context.state = product.state;
+          newAccessory.displayName = product.display_name;
+
+          new VehicleAccessory(this, newAccessory);
+
+          this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
+            newAccessory,
+          ]);
         }
       }
     });
