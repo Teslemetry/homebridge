@@ -7,3 +7,5 @@ export const PLATFORM_NAME = "Teslemetry";
  * This must match the name of your plugin as defined the package.json
  */
 export const PLUGIN_NAME = "homebridge-teslemetry";
+
+export const REFRESH_INTERVAL = 30000;

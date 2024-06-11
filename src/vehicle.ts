@@ -2,6 +2,7 @@ import { CharacteristicValue, PlatformAccessory, Service } from "homebridge";
 
 import VehicleSpecific from "tesla-fleet-api/dist/vehiclespecific.js";
 import { TeslaFleetApiPlatform } from "./platform.js";
+import { REFRESH_INTERVAL } from "./settings.js";
 
 /**
  * Platform Accessory
@@ -24,8 +25,6 @@ export class VehicleAccessory {
     private readonly platform: TeslaFleetApiPlatform,
     private readonly accessory: PlatformAccessory
   ) {
-    // set accessory information
-
     if (!this.platform.TeslaFleetApi?.vehicle) {
       throw new Error("TeslaFleetApi not initialized");
     }
@@ -45,6 +44,9 @@ export class VehicleAccessory {
         this.platform.Characteristic.SerialNumber,
         this.accessory.context.vin
       );
+
+    this.refresh();
+    setInterval(() => this.refresh(), REFRESH_INTERVAL);
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
@@ -129,6 +131,39 @@ export class VehicleAccessory {
         !motionDetected
       );
     }, 10000);*/
+  }
+
+  async refresh() {
+    this.VehicleSpecific.vehicle_data([
+      "charge_state",
+      "climate_state",
+      "drive_state",
+      "location_data",
+      "vehicle_state",
+    ])
+      .then(
+        ({
+          response: { charge_state, climate_state, drive_state, vehicle_state },
+        }) => {
+          this.accessory.context.data = {
+            charge_state,
+            climate_state,
+            drive_state,
+            vehicle_state,
+          };
+          this.service.updateCharacteristic(
+            this.platform.Characteristic.Active,
+            true
+          );
+        }
+      )
+      .catch((error) => {
+        this.platform.log.warn(error);
+        this.service.updateCharacteristic(
+          this.platform.Characteristic.Active,
+          false
+        );
+      });
   }
 
   /**
