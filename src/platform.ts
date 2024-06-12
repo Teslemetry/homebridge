@@ -72,42 +72,41 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-    this.TeslaFleetApi.products().then((products: any) => {
-      for (const product of products.response) {
-        // Vehicles
-        if ("vin" in product) {
-          const uuid = this.api.hap.uuid.generate(product.vin);
-          const cachedAccessory = this.accessories.find(
-            (accessory) => accessory.UUID === uuid
+    this.TeslaFleetApi.products_by_type().then(({ vehicles, energy_sites }) => {
+      vehicles.forEach((product) => {
+        const uuid = this.api.hap.uuid.generate(product.vin);
+        const cachedAccessory = this.accessories.find(
+          (accessory) => accessory.UUID === uuid
+        );
+        if (cachedAccessory) {
+          cachedAccessory.context.state = product.state;
+          cachedAccessory.displayName = product.display_name;
+          this.log.info(
+            "Restoring existing accessory from cache:",
+            cachedAccessory.displayName
           );
-          if (cachedAccessory) {
-            cachedAccessory.context.state = product.state;
-            cachedAccessory.displayName = product.display_name;
-            this.log.info(
-              "Restoring existing accessory from cache:",
-              cachedAccessory.displayName
-            );
-            new VehicleAccessory(this, cachedAccessory);
-            continue;
-          }
-
-          this.log.info("Adding new accessory:", product.display_name);
-          const newAccessory = new this.api.platformAccessory(
-            product.display_name,
-            uuid
-          );
-
-          newAccessory.context.vin = product.vin;
-          newAccessory.context.state = product.state;
-          newAccessory.displayName = product.display_name;
-
-          new VehicleAccessory(this, newAccessory);
-
-          this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
-            newAccessory,
-          ]);
+          new VehicleAccessory(this, cachedAccessory);
+          return;
         }
-      }
+
+        this.log.info("Adding new accessory:", product.display_name);
+        const newAccessory = new this.api.platformAccessory(
+          product.display_name,
+          uuid
+        );
+
+        newAccessory.context.vin = product.vin;
+        newAccessory.context.state = product.state;
+        newAccessory.displayName = product.display_name;
+
+        new VehicleAccessory(this, newAccessory);
+
+        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
+          newAccessory,
+        ]);
+      });
+
+      energy_sites.forEach((product) => {});
     });
   }
 }
