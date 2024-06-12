@@ -1,22 +1,24 @@
 import { CharacteristicValue, PlatformAccessory, Service } from "homebridge";
 
-import VehicleSpecific from "tesla-fleet-api/dist/vehiclespecific.js";
+import { VehicleSpecific } from "tesla-fleet-api";
+import { VehicleDataResponse } from "tesla-fleet-api/dist/types/vehicle_data.js";
+import { EventEmitter } from "./event.js";
 import { TeslaFleetApiPlatform } from "./platform.js";
 import { BatteryService } from "./services/battery.js";
 import { REFRESH_INTERVAL } from "./settings.js";
 
-/**
- * Platform Accessory
- * An instance of this class is created for each accessory your platform registers
- * Each accessory may expose multiple services of different service types.
- */
+export interface VehicleData {
+  vehicle_data(data: VehicleDataResponse): void;
+}
+
 export class VehicleAccessory {
   private vehicle: VehicleSpecific;
+  public emitter: EventEmitter<VehicleData>;
   private information: Service;
 
   constructor(
-    private readonly platform: TeslaFleetApiPlatform,
-    private readonly accessory: PlatformAccessory
+    public readonly platform: TeslaFleetApiPlatform,
+    public readonly accessory: PlatformAccessory
   ) {
     if (!this.platform.TeslaFleetApi?.vehicle) {
       throw new Error("TeslaFleetApi not initialized");
@@ -25,6 +27,8 @@ export class VehicleAccessory {
     this.vehicle = this.platform.TeslaFleetApi.vehicle.specific(
       this.accessory.context.vin
     );
+
+    this.emitter = new EventEmitter();
 
     this.information = this.accessory.getService(
       this.platform.Service.AccessoryInformation
@@ -44,7 +48,7 @@ export class VehicleAccessory {
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb.
 
-    new BatteryService(this.platform, this.accessory, this.vehicle);
+    new BatteryService(this);
   }
 
   async refresh() {
@@ -63,6 +67,8 @@ export class VehicleAccessory {
           drive_state,
           vehicle_state,
         };
+        this.emitter.emit("vehicle_data", this.accessory.context.data);
+
         this.information.updateCharacteristic(
           this.platform.Characteristic.Active,
           true

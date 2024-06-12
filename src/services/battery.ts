@@ -1,52 +1,56 @@
-import { PlatformAccessory, Service } from "homebridge";
-import { VehicleSpecific } from "tesla-fleet-api";
-import { TeslaFleetApiPlatform } from "../platform.js";
+import { Characteristic, Service } from "homebridge";
+import { VehicleDataResponse } from "tesla-fleet-api/dist/types/vehicle_data.js";
+import { VehicleAccessory } from "../vehicle.js";
 
 export class BatteryService {
   service: Service;
 
-  constructor(
-    private platform: TeslaFleetApiPlatform,
-    private accessory: PlatformAccessory,
-    private vehicle: VehicleSpecific
-  ) {
+  constructor(private parent: VehicleAccessory) {
     this.service =
-      this.accessory.getService(this.platform.Service.BatteryService) ||
-      this.accessory.addService(this.platform.Service.BatteryService);
+      this.parent.accessory.getService(this.parent.platform.Service.Battery) ||
+      this.parent.accessory.addService(this.parent.platform.Service.Battery);
 
     const batteryLevel = this.service
-      .getCharacteristic(this.platform.Characteristic.BatteryLevel)
-      .onGet(this.getLevel.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.BatteryLevel)
+      .onGet(() => this.getLevel(this.parent.accessory.context.data));
 
     const chargingState = this.service
-      .getCharacteristic(this.platform.Characteristic.ChargingState)
-      .onGet(this.getChargingState.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.ChargingState)
+      .onGet(() => this.getChargingState(this.parent.accessory.context.data));
 
     const lowBattery = this.service
-      .getCharacteristic(this.platform.Characteristic.StatusLowBattery)
-      .onGet(this.getLowBattery.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.StatusLowBattery)
+      .onGet(() => this.getLowBattery(this.parent.accessory.context.data));
 
-    /*tesla.on("vehicleDataUpdated", (data) => {
+    this.parent.emitter.on("vehicle_data", (data) => {
       batteryLevel.updateValue(this.getLevel(data));
       chargingState.updateValue(this.getChargingState(data));
       lowBattery.updateValue(this.getLowBattery(data));
-    });*/
+    });
   }
 
-  getLevel(): number {
-    // Assume 50% when not connected and no last-known state.
-    return this.accessory.context?.charge_state?.battery_level ?? 0;
+  getLevel(data: VehicleDataResponse): number {
+    return data?.charge_state?.battery_level ?? 50;
   }
 
-  getChargingState(): number {
-    return this.accessory.context?.charge_state?.charging_state === "Charging"
-      ? this.platform.Characteristic.ChargingState.CHARGING
-      : this.platform.Characteristic.ChargingState.NOT_CHARGING;
+  getChargingState(data: VehicleDataResponse): number {
+    switch (data?.charge_state?.charging_state) {
+      case "Starting":
+        return this.parent.platform.Characteristic.ChargingState.CHARGING;
+      case "Charging":
+        return this.parent.platform.Characteristic.ChargingState.CHARGING;
+      case "Disconnected":
+        return this.parent.platform.Characteristic.ChargingState.NOT_CHARGEABLE;
+      case "NoPower":
+        return this.parent.platform.Characteristic.ChargingState.NOT_CHARGEABLE;
+      default:
+        return this.parent.platform.Characteristic.ChargingState.NOT_CHARGING;
+    }
   }
 
-  getLowBattery(): boolean {
-    return this.accessory.context?.charge_state?.battery_level
-      ? this.accessory.context.charge_state.battery_level <= 20
+  getLowBattery(data: VehicleDataResponse): boolean {
+    return data?.charge_state?.battery_level
+      ? data.charge_state.battery_level <= 20
       : false;
   }
 }
