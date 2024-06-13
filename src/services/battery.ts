@@ -11,15 +11,15 @@ export class BatteryService {
 
     const batteryLevel = this.service
       .getCharacteristic(this.parent.platform.Characteristic.BatteryLevel)
-      .onGet(this.getLevel);
+      .onGet(this.getLevel.bind(this));
 
     const chargingState = this.service
       .getCharacteristic(this.parent.platform.Characteristic.ChargingState)
-      .onGet(this.getChargingState);
+      .onGet(this.getChargingState.bind(this));
 
     const lowBattery = this.service
       .getCharacteristic(this.parent.platform.Characteristic.StatusLowBattery)
-      .onGet(this.getLowBattery);
+      .onGet(this.getLowBattery.bind(this));
 
     this.parent.emitter.on("vehicle_data", () => {
       batteryLevel.updateValue(this.getLevel());

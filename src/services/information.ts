@@ -7,6 +7,7 @@ export class AccessoryInformationService {
   service: Service;
 
   constructor(private parent: VehicleAccessory) {
+    this.parent = parent;
     this.service =
       this.parent.accessory.getService(
         this.parent.platform.Service.AccessoryInformation
@@ -15,7 +16,7 @@ export class AccessoryInformationService {
         this.parent.platform.Service.AccessoryInformation
       );
 
-    this.service // Move this to a separate service
+    this.service
       .setCharacteristic(
         this.parent.platform.Characteristic.Manufacturer,
         "Tesla"
@@ -31,11 +32,11 @@ export class AccessoryInformationService {
 
     const version = this.service
       .getCharacteristic(this.parent.platform.Characteristic.FirmwareRevision)
-      .onGet(this.getVersion);
+      .onGet(this.getVersion.bind(this));
 
     this.service
       .getCharacteristic(this.parent.platform.Characteristic.Identify)
-      .onSet(this.setIdentify);
+      .onSet(this.setIdentify.bind(this));
 
     this.parent.emitter.on("vehicle_data", () => {
       version.updateValue(this.getVersion());

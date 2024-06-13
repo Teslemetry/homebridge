@@ -59,7 +59,7 @@ export class VehicleAccessory {
     new BatteryService(this);
   }
 
-  async refresh() {
+  async refresh(): Promise<void> {
     this.vehicle
       .vehicle_data([
         "charge_state",
@@ -82,7 +82,7 @@ export class VehicleAccessory {
       });
   }
 
-  async wake_up() {
+  async wake_up(): Promise<void> {
     if (this.accessory.context.state === "online") {
       return Promise.resolve();
     }
