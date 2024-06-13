@@ -1,5 +1,4 @@
-import { Characteristic, Service } from "homebridge";
-import { VehicleDataResponse } from "tesla-fleet-api/dist/types/vehicle_data.js";
+import { Service } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
 
 export class BatteryService {
@@ -12,29 +11,29 @@ export class BatteryService {
 
     const batteryLevel = this.service
       .getCharacteristic(this.parent.platform.Characteristic.BatteryLevel)
-      .onGet(() => this.getLevel(this.parent.accessory.context.data));
+      .onGet(this.getLevel);
 
     const chargingState = this.service
       .getCharacteristic(this.parent.platform.Characteristic.ChargingState)
-      .onGet(() => this.getChargingState(this.parent.accessory.context.data));
+      .onGet(this.getChargingState);
 
     const lowBattery = this.service
       .getCharacteristic(this.parent.platform.Characteristic.StatusLowBattery)
-      .onGet(() => this.getLowBattery(this.parent.accessory.context.data));
+      .onGet(this.getLowBattery);
 
-    this.parent.emitter.on("vehicle_data", (data) => {
-      batteryLevel.updateValue(this.getLevel(data));
-      chargingState.updateValue(this.getChargingState(data));
-      lowBattery.updateValue(this.getLowBattery(data));
+    this.parent.emitter.on("vehicle_data", () => {
+      batteryLevel.updateValue(this.getLevel());
+      chargingState.updateValue(this.getChargingState());
+      lowBattery.updateValue(this.getLowBattery());
     });
   }
 
-  getLevel(data: VehicleDataResponse): number {
-    return data?.charge_state?.battery_level ?? 50;
+  getLevel(): number {
+    return this.parent.accessory.context?.charge_state?.battery_level ?? 50;
   }
 
-  getChargingState(data: VehicleDataResponse): number {
-    switch (data?.charge_state?.charging_state) {
+  getChargingState(): number {
+    switch (this.parent.accessory.context?.charge_state?.charging_state) {
       case "Starting":
         return this.parent.platform.Characteristic.ChargingState.CHARGING;
       case "Charging":
@@ -48,9 +47,7 @@ export class BatteryService {
     }
   }
 
-  getLowBattery(data: VehicleDataResponse): boolean {
-    return data?.charge_state?.battery_level
-      ? data.charge_state.battery_level <= 20
-      : false;
+  getLowBattery(): boolean {
+    return this.getLevel() <= 20;
   }
 }

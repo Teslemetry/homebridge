@@ -9,7 +9,7 @@ import {
 } from "homebridge";
 
 import { PLATFORM_NAME, PLUGIN_NAME } from "./settings.js";
-import { VehicleAccessory } from "./vehicle.js";
+import { VehicleAccessory, VehicleContext } from "./vehicle.js";
 
 import { Teslemetry } from "tesla-fleet-api";
 
@@ -24,7 +24,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
   public readonly TeslaFleetApi: Teslemetry;
 
   // this is used to track restored cached accessories
-  public readonly accessories: PlatformAccessory[] = [];
+  public readonly accessories: PlatformAccessory<VehicleContext>[] = [];
 
   constructor(
     public readonly log: Logging,
@@ -59,7 +59,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
    * This function is invoked when homebridge restores cached accessories from disk at startup.
    * It should be used to set up event handlers for characteristics and update respective values.
    */
-  configureAccessory(accessory: PlatformAccessory) {
+  configureAccessory(accessory: PlatformAccessory<VehicleContext>) {
     this.log.info("Loading accessory from cache:", accessory.displayName);
 
     // add the restored accessory to the accessories cache, so we can track if it has already been registered
@@ -90,11 +90,10 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
         }
 
         this.log.info("Adding new accessory:", product.display_name);
-        const newAccessory = new this.api.platformAccessory(
+        const newAccessory = new this.api.platformAccessory<VehicleContext>(
           product.display_name,
           uuid
         );
-
         newAccessory.context.vin = product.vin;
         newAccessory.context.state = product.state;
         newAccessory.displayName = product.display_name;
