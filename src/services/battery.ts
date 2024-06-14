@@ -1,13 +1,9 @@
-import { Service } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
+import { BaseService } from "./base.js";
 
-export class BatteryService {
-  service: Service;
-
-  constructor(private parent: VehicleAccessory) {
-    this.service =
-      this.parent.accessory.getService(this.parent.platform.Service.Battery) ||
-      this.parent.accessory.addService(this.parent.platform.Service.Battery);
+export class BatteryService extends BaseService {
+  constructor(parent: VehicleAccessory) {
+    super(parent, parent.platform.Service.Battery, "SOC");
 
     const batteryLevel = this.service
       .getCharacteristic(this.parent.platform.Characteristic.BatteryLevel)

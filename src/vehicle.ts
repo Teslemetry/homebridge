@@ -1,4 +1,4 @@
-import { CharacteristicValue, PlatformAccessory, Service } from "homebridge";
+import { PlatformAccessory } from "homebridge";
 
 import { VehicleSpecific } from "tesla-fleet-api";
 import {
@@ -9,10 +9,11 @@ import {
   VehicleConfig,
   VehicleState,
 } from "tesla-fleet-api/dist/types/vehicle_data";
-import { VehicleDataResponse } from "tesla-fleet-api/dist/types/vehicle_data.js";
 import { TeslaFleetApiPlatform } from "./platform.js";
 import { BatteryService } from "./services/battery.js";
+import { DoorService } from "./services/door.js";
 import { AccessoryInformationService } from "./services/information.js";
+import { ClimateService } from "./services/thermostat.js";
 import { REFRESH_INTERVAL } from "./settings.js";
 import { EventEmitter } from "./utils/event.js";
 
@@ -57,6 +58,9 @@ export class VehicleAccessory {
 
     new AccessoryInformationService(this);
     new BatteryService(this);
+    new DoorService(this, "front");
+    new DoorService(this, "rear");
+    new ClimateService(this);
   }
 
   async refresh(): Promise<void> {

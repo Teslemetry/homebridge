@@ -1,20 +1,11 @@
 // https://developers.homebridge.io/#/service/AccessoryInformation
 
-import { CharacteristicValue, Service } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
+import { BaseService } from "./base.js";
 
-export class AccessoryInformationService {
-  service: Service;
-
-  constructor(private parent: VehicleAccessory) {
-    this.parent = parent;
-    this.service =
-      this.parent.accessory.getService(
-        this.parent.platform.Service.AccessoryInformation
-      ) ||
-      this.parent.accessory.addService(
-        this.parent.platform.Service.AccessoryInformation
-      );
+export class AccessoryInformationService extends BaseService {
+  constructor(parent: VehicleAccessory) {
+    super(parent, parent.platform.Service.AccessoryInformation);
 
     this.service
       .setCharacteristic(
@@ -45,16 +36,11 @@ export class AccessoryInformationService {
 
   getVersion(): string {
     return (
-      this.parent.accessory.context?.vehicle_state?.software_update?.version ??
-      "unknown"
+      this.parent.accessory.context?.vehicle_state?.car_version ?? "unknown"
     );
   }
 
-  async setIdentify(value: CharacteristicValue) {
-    console.log(value);
-    return this.parent
-      .wake_up()
-      .then(() => this.parent.vehicle.flash_lights())
-      .then(() => false);
+  async setIdentify(): Promise<void> {
+    await this.parent.wake_up().then(() => this.parent.vehicle.flash_lights());
   }
 }

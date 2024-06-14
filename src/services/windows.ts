@@ -1,20 +1,12 @@
-//https://developers.homebridge.io/#/service/Door
+//https://developers.homebridge.io/#/service/Window
 
 import { CharacteristicValue } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 
-export class DoorService extends BaseService {
-  key: "ft" | "rt";
-
-  constructor(parent: VehicleAccessory, private trunk: "front" | "rear") {
-    super(
-      parent,
-      parent.platform.Service.Door,
-      trunk === "front" ? "Frunk" : "Trunk"
-    );
-
-    this.key = this.trunk === "front" ? "ft" : "rt";
+export class WindowService extends BaseService {
+  constructor(parent: VehicleAccessory) {
+    super(parent, parent.platform.Service.Window, "Windows");
 
     const currentPosition = this.service
       .getCharacteristic(this.parent.platform.Characteristic.CurrentPosition)
@@ -36,18 +28,21 @@ export class DoorService extends BaseService {
   }
 
   getPosition(): number {
-    return this.parent.accessory.context?.vehicle_state?.[this.key] ? 100 : 0;
+    return this.parent.accessory.context?.vehicle_state?.fd_window |
+      this.parent.accessory.context?.vehicle_state?.fp_window |
+      this.parent.accessory.context?.vehicle_state?.rd_window |
+      this.parent.accessory.context?.vehicle_state?.rp_window
+      ? 100
+      : 0;
   }
 
   async setPosition(value: CharacteristicValue) {
     console.log(value);
-    const position = this.getPosition();
-    if (
-      (position === 0 && value === 100) ||
-      (position === 100 && value === 0 && this.trunk === "rear")
-    ) {
-      return this.parent.vehicle.actuate_truck(this.trunk).then(() => value);
-    }
-    return position;
+    const { latitude, longitude } =
+      this.parent.accessory.context?.drive_state ?? {};
+
+    return this.parent.vehicle
+      .window_control(value === 100 ? "close" : "vent", latitude, longitude)
+      .then(() => value);
   }
 }
