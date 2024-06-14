@@ -6,6 +6,7 @@ export abstract class BaseService {
 
   constructor(
     protected parent: VehicleAccessory,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     definition: any,
     name: string | undefined = undefined
   ) {

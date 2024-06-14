@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
 
 type ListenerArgs<T> = T extends Listener ? Parameters<T> : never;

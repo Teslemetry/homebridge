@@ -1,6 +1,5 @@
 // https://developers.homebridge.io/#/service/FirmwareUpdate
 
-import { CharacteristicValue } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 
@@ -27,8 +26,9 @@ export class WindowService extends BaseService {
       .onGet(this.getStaged.bind(this));
 
     this.parent.emitter.on("vehicle_data", () => {
-      //currentPosition.updateValue(this.getPosition());
-      //targetPosition.updateValue(this.getPosition());
+      readiness.updateValue(this.getReadiness());
+      status.updateValue(this.getStatus());
+      staged.updateValue(this.getStaged());
     });
   }
 

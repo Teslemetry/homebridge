@@ -64,17 +64,17 @@ export class ClimateService extends BaseService {
   async setTargetState(value: CharacteristicValue) {
     return value
       ? this.parent.vehicle
-          .auto_conditioning_start()
-          .then(
-            () =>
-              this.parent.platform.Characteristic.TargetHeatingCoolingState.AUTO
-          )
+        .auto_conditioning_start()
+        .then(
+          () =>
+            this.parent.platform.Characteristic.TargetHeatingCoolingState.AUTO
+        )
       : this.parent.vehicle
-          .auto_conditioning_stop()
-          .then(
-            () =>
-              this.parent.platform.Characteristic.TargetHeatingCoolingState.OFF
-          );
+        .auto_conditioning_stop()
+        .then(
+          () =>
+            this.parent.platform.Characteristic.TargetHeatingCoolingState.OFF
+        );
   }
 
   getCurrentTemp(): number {

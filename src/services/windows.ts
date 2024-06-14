@@ -37,7 +37,6 @@ export class WindowService extends BaseService {
   }
 
   async setPosition(value: CharacteristicValue) {
-    console.log(value);
     const { latitude, longitude } =
       this.parent.accessory.context?.drive_state ?? {};
 

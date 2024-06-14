@@ -40,7 +40,6 @@ export class DoorService extends BaseService {
   }
 
   async setPosition(value: CharacteristicValue) {
-    console.log(value);
     const position = this.getPosition();
     if (
       (position === 0 && value === 100) ||
