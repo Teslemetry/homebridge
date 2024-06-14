@@ -1,4 +1,4 @@
-//https://developers.homebridge.io/#/service/FirmwareUpdate
+// https://developers.homebridge.io/#/service/FirmwareUpdate
 
 import { CharacteristicValue } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";

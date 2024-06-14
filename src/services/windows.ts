@@ -1,4 +1,4 @@
-//https://developers.homebridge.io/#/service/Window
+// https://developers.homebridge.io/#/service/Window
 
 import { CharacteristicValue } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";

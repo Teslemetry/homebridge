@@ -1,4 +1,4 @@
-//https://developers.homebridge.io/#/service/Window
+// https://developers.homebridge.io/#/service/Thermostat
 
 import { CharacteristicValue } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
