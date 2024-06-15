@@ -1,5 +1,4 @@
 import { CharacteristicValue } from "homebridge";
-import { debounce } from "../utils/debounce.js";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 
@@ -7,34 +6,36 @@ export class ChargePortService extends BaseService {
     constructor(parent: VehicleAccessory) {
         super(parent, parent.platform.Service.LockMechanism, "charge port", "charge_port");
 
-        const on = this.service
-            .getCharacteristic(this.parent.platform.Characteristic.On)
-            .onGet(this.getOn.bind(this));
+        const currentState = this.service
+            .getCharacteristic(this.parent.platform.Characteristic.LockCurrentState)
+            .onGet(this.getState.bind(this));
 
-        const level = this.service
-            .getCharacteristic(this.parent.platform.Characteristic.ChargingState)
-            .onGet(this.getLevel.bind(this))
-            .onSet(debounce(this.setLevel.bind(this), 3000));
+        this.service
+            .getCharacteristic(this.parent.platform.Characteristic.LockTargetState)
+            .onGet(this.getState.bind(this))
+            .onSet(this.setState.bind(this));
 
         this.parent.emitter.on("vehicle_data", () => {
-            on.updateValue(this.getOn());
-            level.updateValue(this.getLevel());
+            currentState.updateValue(this.getState());
         });
     }
 
-    getOn(): boolean {
-        return this.parent.accessory.context?.charge_state?.user_charge_enable_request
-            ?? this.parent.accessory.context?.charge_state?.charge_enable_request;
+    getState(): number {
+        return this.parent.accessory.context?.charge_state?.charge_port_latch ?
+            this.parent.platform.Characteristic.LockTargetState.SECURED :
+            this.parent.platform.Characteristic.LockTargetState.UNSECURED;
     }
 
-    getLevel(): number {
-        return this.parent.accessory.context?.charge_state?.charge_limit_soc ?? 50;
-    }
+    setState(value: CharacteristicValue): Promise<number> {
+        const open = value === this.parent.platform.Characteristic.LockTargetState.UNSECURED;
 
-    setLevel(value: CharacteristicValue): Promise<number> {
-        const min = this.parent.accessory.context.charge_state.charge_limit_soc_min ?? 50;
-        const max = this.parent.accessory.context.charge_state.charge_limit_soc_max ?? 100;
-        value = Math.max(min, Math.min(max, value as number));
-        return this.parent.vehicle.set_charge_limit(value).then(() => value);
+        if (open) {
+            return this.parent.vehicle.charge_port_door_open().then(() =>
+                this.parent.platform.Characteristic.LockTargetState.SECURED
+            );
+        }
+        return this.parent.vehicle.charge_port_door_close().then(() =>
+            this.parent.platform.Characteristic.LockTargetState.UNSECURED
+        );
     }
 }
