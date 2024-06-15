@@ -72,10 +72,11 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-    const newAccessories: PlatformAccessory<VehicleContext>[] = [];
+    //const newAccessories: PlatformAccessory<VehicleContext>[] = [];
     this.TeslaFleetApi.products_by_type()
-      .then(({ vehicles, energy_sites }) => {
-        vehicles.forEach((product) => {
+      .then(async ({ vehicles, energy_sites }) => {
+        vehicles.forEach(async (product) => {
+          this.TeslaFleetApi.vehicle!;
           const uuid = this.api.hap.uuid.generate(product.vin);
           const cachedAccessory = this.accessories.find(
             (accessory) => accessory.UUID === uuid
@@ -100,20 +101,16 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
           newAccessory.context.state = product.state;
           newAccessory.displayName = product.display_name;
 
-          new VehicleAccessory(this, newAccessory);
 
-          newAccessories.push(newAccessory);
+          new VehicleAccessory(this, newAccessory);
+          this.api.registerPlatformAccessories(
+            PLUGIN_NAME,
+            PLATFORM_NAME,
+            [newAccessory]
+          );
         });
 
-        energy_sites.forEach((product) => {});
-        return newAccessories;
-      })
-      .then((newAccessories) =>
-        this.api.registerPlatformAccessories(
-          PLUGIN_NAME,
-          PLATFORM_NAME,
-          newAccessories
-        )
-      );
+        energy_sites.forEach((product) => { });
+      });
   }
 }

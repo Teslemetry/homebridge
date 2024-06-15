@@ -6,7 +6,7 @@ import { BaseService } from "./base.js";
 
 export class ClimateService extends BaseService {
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.Thermostat, "Climate");
+    super(parent, parent.platform.Service.Thermostat, "climate", "climate");
 
     const currentState = this.service
       .getCharacteristic(
@@ -55,7 +55,7 @@ export class ClimateService extends BaseService {
   }
 
   getTargetState(): number {
-    if (!this.parent.accessory.context?.climate_state.is_climate_on) {
+    if (!this.parent.accessory.context?.climate_state?.is_climate_on) {
       return this.parent.platform.Characteristic.TargetHeatingCoolingState.OFF;
     }
     return this.parent.platform.Characteristic.TargetHeatingCoolingState.AUTO;
@@ -83,7 +83,7 @@ export class ClimateService extends BaseService {
 
   getTargetTemp(): number {
     return (
-      this.parent.accessory.context?.climate_state?.driver_temp_setting ?? 0
+      this.parent.accessory.context?.climate_state?.driver_temp_setting ?? 10
     );
   }
 

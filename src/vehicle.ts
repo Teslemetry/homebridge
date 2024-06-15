@@ -13,7 +13,7 @@ import { TeslaFleetApiPlatform } from "./platform.js";
 import { BatteryService } from "./services/battery.js";
 import { DoorService } from "./services/door.js";
 import { AccessoryInformationService } from "./services/information.js";
-import { ClimateService } from "./services/thermostat.js";
+import { ClimateService } from "./services/climate.js";
 import { REFRESH_INTERVAL } from "./settings.js";
 import { EventEmitter } from "./utils/event.js";
 

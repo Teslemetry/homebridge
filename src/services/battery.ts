@@ -3,7 +3,7 @@ import { BaseService } from "./base.js";
 
 export class BatteryService extends BaseService {
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.Battery, "SOC");
+    super(parent, parent.platform.Service.Battery, "SOC", "soc");
 
     const batteryLevel = this.service
       .getCharacteristic(this.parent.platform.Characteristic.BatteryLevel)

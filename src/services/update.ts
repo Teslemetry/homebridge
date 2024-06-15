@@ -3,9 +3,9 @@
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 
-export class WindowService extends BaseService {
+export class UpdateService extends BaseService {
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.FirmwareUpdate, "Update");
+    super(parent, parent.platform.Service.FirmwareUpdate, "Update", "update");
 
     const readiness = this.service
       .getCharacteristic(

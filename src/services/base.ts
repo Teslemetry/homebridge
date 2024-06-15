@@ -6,13 +6,13 @@ export abstract class BaseService {
 
   constructor(
     protected parent: VehicleAccessory,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    definition: any,
-    name: string | undefined = undefined
+    definition: typeof Service,
+    name: string,
+    subtype: string,
   ) {
     this.service =
-      this.parent.accessory.getService(definition) ||
-      this.parent.accessory.addService(definition);
+      this.parent.accessory.getService(`${this.parent.accessory.displayName} ${name}`) ||
+      this.parent.accessory.addService(definition, `${this.parent.accessory.displayName} ${name}`, subtype);
 
     if (name) {
       this.service.setCharacteristic(

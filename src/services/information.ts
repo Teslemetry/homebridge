@@ -1,13 +1,13 @@
 // https://developers.homebridge.io/#/service/AccessoryInformation
 
+import { Service } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
-import { BaseService } from "./base.js";
 
-export class AccessoryInformationService extends BaseService {
-  constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.AccessoryInformation);
+export class AccessoryInformationService {
+  service: Service;
 
-    this.service
+  constructor(private parent: VehicleAccessory) {
+    this.service = this.parent.accessory.getService(this.parent.platform.Service.AccessoryInformation)!
       .setCharacteristic(
         this.parent.platform.Characteristic.Manufacturer,
         "Tesla"
@@ -21,13 +21,12 @@ export class AccessoryInformationService extends BaseService {
         this.parent.vehicle.vin
       );
 
+    this.service.getCharacteristic(this.parent.platform.Characteristic.Identify)
+      .onSet(this.setIdentify.bind(this));
+
     const version = this.service
       .getCharacteristic(this.parent.platform.Characteristic.FirmwareRevision)
       .onGet(this.getVersion.bind(this));
-
-    this.service
-      .getCharacteristic(this.parent.platform.Characteristic.Identify)
-      .onSet(this.setIdentify.bind(this));
 
     this.parent.emitter.on("vehicle_data", () => {
       version.updateValue(this.getVersion());
