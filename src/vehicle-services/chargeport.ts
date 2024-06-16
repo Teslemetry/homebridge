@@ -1,41 +1,40 @@
-import { CharacteristicValue } from "homebridge";
+import { Characteristic, CharacteristicValue } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 
 export class ChargePortService extends BaseService {
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.LockMechanism, "charge port", "charge_port");
+    super(parent, parent.platform.Service.LockMechanism, "Charge Port", "charge_port");
 
     const currentState = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.LockCurrentState)
-      .onGet(this.getState.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.LockCurrentState);
+    //.onGet(this.getState.bind(this));
 
-    this.service
+    const targetState = this.service
       .getCharacteristic(this.parent.platform.Characteristic.LockTargetState)
-      .onGet(this.getState.bind(this))
-      .onSet(this.setState.bind(this));
+      //.onGet(this.getState.bind(this))
+      .onSet((value) => this.setState(value, targetState));
 
-    this.parent.emitter.on("vehicle_data", () => {
-      currentState.updateValue(this.getState());
+    this.parent.emitter.on("vehicle_data", (data) => {
+      const state = (data.charge_state.charge_port_latch === "Engaged") ?
+        this.platform.Characteristic.LockTargetState.SECURED :
+        this.platform.Characteristic.LockTargetState.UNSECURED;
+      currentState.updateValue(state);
+      targetState.updateValue(state);
     });
   }
 
-  getState(): number {
-    return this.parent.accessory.context?.charge_state?.charge_port_latch ?
-      this.parent.platform.Characteristic.LockTargetState.SECURED :
-      this.parent.platform.Characteristic.LockTargetState.UNSECURED;
-  }
-
-  setState(value: CharacteristicValue): Promise<number> {
-    const open = value === this.parent.platform.Characteristic.LockTargetState.UNSECURED;
-
-    if (open) {
-      return this.parent.vehicle.charge_port_door_open().then(() =>
-        this.parent.platform.Characteristic.LockTargetState.SECURED
-      );
-    }
-    return this.parent.vehicle.charge_port_door_close().then(() =>
-      this.parent.platform.Characteristic.LockTargetState.UNSECURED
+  async setState(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
+    await this.vehicle.wake_up().then(() =>
+      value === this.parent.platform.Characteristic.LockTargetState.SECURED ?
+        this.vehicle.charge_port_door_close()
+          .then(() =>
+            characteristic.updateValue(this.parent.platform.Characteristic.LockTargetState.SECURED)
+          ) :
+        this.vehicle.charge_port_door_open()
+          .then(() =>
+            characteristic.updateValue(this.parent.platform.Characteristic.LockTargetState.UNSECURED)
+          )
     );
   }
 }

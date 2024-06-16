@@ -7,9 +7,12 @@ import {
   DriveState,
   GUISettings,
   VehicleConfig,
+  VehicleDataResponse,
   VehicleState,
 } from "tesla-fleet-api/dist/types/vehicle_data";
 import { TeslaFleetApiPlatform } from "./platform.js";
+import { REFRESH_INTERVAL } from "./settings.js";
+import { EventEmitter } from "./utils/event.js";
 import { BatteryService } from "./vehicle-services/battery.js";
 import { ChargeCurrentService } from "./vehicle-services/chargecurrent.js";
 import { ChargeLimitService } from "./vehicle-services/chargelimit.js";
@@ -18,9 +21,8 @@ import { ChargeSwitchService } from "./vehicle-services/chargeswitch.js";
 import { ClimateService } from "./vehicle-services/climate.js";
 import { DoorService } from "./vehicle-services/door.js";
 import { AccessoryInformationService } from "./vehicle-services/information.js";
+import { LockService } from "./vehicle-services/lock.js";
 import { WindowService } from "./vehicle-services/windows.js";
-import { REFRESH_INTERVAL } from "./settings.js";
-import { EventEmitter } from "./utils/event.js";
 
 export type VehicleContext = {
   vin: string;
@@ -34,7 +36,7 @@ export type VehicleContext = {
 };
 
 export interface VehicleDataEvent {
-  vehicle_data(data: VehicleContext): void;
+  vehicle_data(data: VehicleDataResponse): void;
 }
 
 export class VehicleAccessory {
@@ -55,11 +57,7 @@ export class VehicleAccessory {
 
     this.emitter = new EventEmitter();
 
-    this.refresh();
-    setInterval(() => this.refresh(), REFRESH_INTERVAL);
-
-    // each service must implement at-minimum the "required characteristics" for the given service type
-    // see https://developers.homebridge.io/#/service/Lightbulb.
+    // Create services
 
     new AccessoryInformationService(this);
     new BatteryService(this);
@@ -70,7 +68,13 @@ export class VehicleAccessory {
     new ChargeSwitchService(this);
     new DoorService(this, "front");
     new DoorService(this, "rear");
+    new LockService(this);
     new WindowService(this);
+
+    // Get data and schedule refresh
+
+    this.refresh();
+    setInterval(() => this.refresh(), REFRESH_INTERVAL);
   }
 
   async refresh(): Promise<void> {
@@ -82,17 +86,23 @@ export class VehicleAccessory {
         "location_data",
         "vehicle_state",
       ])
-      .then(({ charge_state, climate_state, drive_state, vehicle_state }) => {
+      .then((data) => {
         this.accessory.context.state = "online";
-        this.accessory.context.charge_state = charge_state;
-        this.accessory.context.climate_state = climate_state;
-        this.accessory.context.drive_state = drive_state;
-        this.accessory.context.vehicle_state = vehicle_state;
-        this.emitter.emit("vehicle_data", this.accessory.context);
+        this.accessory.context.charge_state = data.charge_state;
+        this.accessory.context.climate_state = data.climate_state;
+        this.accessory.context.drive_state = data.drive_state;
+        this.accessory.context.vehicle_state = data.vehicle_state;
+        this.emitter.emit("vehicle_data", data);
       })
-      .catch((error: string) => {
-        this.platform.log.warn(error);
-        this.accessory.context.state = "offline";
+      .catch((data) => {
+        if (data?.status === 408) {
+          this.accessory.context.state = "offline";
+          return;
+        }
+        if (data?.error) {
+          this.platform.log.warn(data.error);
+        }
+        this.platform.log.error(data);
       });
   }
 

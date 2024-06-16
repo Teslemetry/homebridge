@@ -3,33 +3,33 @@ import { BaseService } from "./base.js";
 
 export class BatteryService extends BaseService {
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.Battery, "SOC", "soc");
+    super(parent, parent.platform.Service.Battery, "Battery", "soc");
 
     const batteryLevel = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.BatteryLevel)
-      .onGet(this.getLevel.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.BatteryLevel);
+    //.onGet(this.getLevel.bind(this));
 
     const chargingState = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.ChargingState)
-      .onGet(this.getChargingState.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.ChargingState);
+    //.onGet(this.getChargingState.bind(this));
 
     const lowBattery = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.StatusLowBattery)
-      .onGet(this.getLowBattery.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.StatusLowBattery);
+    //.onGet(this.getLowBattery.bind(this));
 
-    this.parent.emitter.on("vehicle_data", () => {
-      batteryLevel.updateValue(this.getLevel());
-      chargingState.updateValue(this.getChargingState());
-      lowBattery.updateValue(this.getLowBattery());
+    this.parent.emitter.on("vehicle_data", (data) => {
+      batteryLevel.updateValue(this.getLevel(data));
+      chargingState.updateValue(this.getChargingState(data));
+      lowBattery.updateValue(this.getLowBattery(data));
     });
   }
 
-  getLevel(): number {
-    return this.parent.accessory.context?.charge_state?.battery_level ?? 50;
+  getLevel(data): number {
+    return data.charge_state?.battery_level ?? 50;
   }
 
-  getChargingState(): number {
-    switch (this.parent.accessory.context?.charge_state?.charging_state) {
+  getChargingState(data): number {
+    switch (data.charge_state?.charging_state) {
       case "Starting":
         return this.parent.platform.Characteristic.ChargingState.CHARGING;
       case "Charging":
@@ -43,7 +43,7 @@ export class BatteryService extends BaseService {
     }
   }
 
-  getLowBattery(): boolean {
-    return this.getLevel() <= 20;
+  getLowBattery(data): boolean {
+    return this.getLevel(data) <= 20;
   }
 }

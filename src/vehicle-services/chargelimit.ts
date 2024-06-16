@@ -1,39 +1,38 @@
-import { CharacteristicValue } from "homebridge";
+import { Characteristic, CharacteristicValue } from "homebridge";
+import { VehicleDataResponse } from "tesla-fleet-api/dist/types/vehicle_data.js";
 import { debounce } from "../utils/debounce.js";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 
 export class ChargeLimitService extends BaseService {
+
+  min: number = 50;
+  max: number = 100;
+
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.Lightbulb, "charge limit", "charge_limit");
+    super(parent, parent.platform.Service.Lightbulb, "Charge Limit", "charge_limit");
 
     const on = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.On)
-      .onGet(this.getOn.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.On);
+    //.onGet(this.getOn.bind(this));
 
     const level = this.service
       .getCharacteristic(this.parent.platform.Characteristic.Brightness)
-      .onGet(this.getLevel.bind(this))
-      .onSet(debounce(this.setLevel.bind(this), 3000));
+      //.onGet(this.getLevel.bind(this))
+      .onSet(debounce((value) => this.setLevel(value, level), 3000));
 
-    this.parent.emitter.on("vehicle_data", () => {
-      on.updateValue(this.getOn());
-      level.updateValue(this.getLevel());
+    this.parent.emitter.on("vehicle_data", (data) => {
+      this.min = data.charge_state.charge_limit_soc_min ?? this.min;
+      this.max = data.charge_state.charge_limit_soc_max ?? this.max;
+      on.updateValue(true);
+      level.updateValue(data.charge_state.charge_limit_soc);
     });
   }
 
-  getOn(): boolean {
-    return !!this.parent.accessory.context?.charge_state;
-  }
-
-  getLevel(): number {
-    return this.parent.accessory.context?.charge_state?.charge_limit_soc ?? 50;
-  }
-
-  setLevel(value: CharacteristicValue): Promise<number> {
-    const min = this.parent.accessory.context.charge_state.charge_limit_soc_min ?? 50;
-    const max = this.parent.accessory.context.charge_state.charge_limit_soc_max ?? 100;
-    value = Math.max(min, Math.min(max, value as number));
-    return this.parent.vehicle.set_charge_limit(value).then(() => value);
+  async setLevel(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
+    value = Math.max(this.min, Math.min(this.max, value as number));
+    await this.vehicle.wake_up()
+      .then(() => this.vehicle.set_charge_limit(value))
+      .then(() => characteristic.updateValue(value));
   }
 }

@@ -1,95 +1,87 @@
 // https://developers.homebridge.io/#/service/Thermostat
 
-import { CharacteristicValue } from "homebridge";
+import { Characteristic, CharacteristicValue } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 
 export class ClimateService extends BaseService {
+  displayUnits: number = 0; // Celsius by default
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.Thermostat, "climate", "climate");
+    super(parent, parent.platform.Service.Thermostat, "Climate", "climate");
 
     const currentState = this.service
       .getCharacteristic(
         this.parent.platform.Characteristic.CurrentHeatingCoolingState
-      )
-      .onGet(this.getCurrentState.bind(this));
+      );
+    //.onGet(this.getCurrentState.bind(this));
 
     const targetState = this.service
       .getCharacteristic(
         this.parent.platform.Characteristic.TargetHeatingCoolingState
       )
-      .onGet(this.getTargetState.bind(this))
-      .onSet(this.setTargetState.bind(this));
+      //.onGet(this.getTargetState.bind(this))
+      .onSet((value) => this.setTargetState(value, targetState));
 
     const currentTemp = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.CurrentTemperature)
-      .onGet(this.getCurrentTemp.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.CurrentTemperature);
+    //.onGet(this.getCurrentTemp.bind(this));
 
     const targetTemp = this.service
       .getCharacteristic(this.parent.platform.Characteristic.TargetTemperature)
-      .onGet(this.getTargetTemp.bind(this))
-      .onSet(this.setTargetTemp.bind(this));
+      //.onGet(this.getTargetTemp.bind(this))
+      .onSet((value) => this.setTargetTemp(value, targetTemp));
 
-    this.service.setCharacteristic(
+    this.service
+      .getCharacteristic(this.parent.platform.Characteristic.TemperatureDisplayUnits)
+      //.onGet(() => this.displayUnits)
+      .onSet((value: CharacteristicValue) => {
+        this.displayUnits = value as number;
+      });
+
+    /*this.service.setCharacteristic(
       this.parent.platform.Characteristic.TemperatureDisplayUnits,
       this.parent.platform.Characteristic.TemperatureDisplayUnits.CELSIUS
-    );
+    );*/
 
-    this.parent.emitter.on("vehicle_data", () => {
-      currentState.updateValue(this.getCurrentState());
-      targetState.updateValue(this.getTargetState());
-      currentTemp.updateValue(this.getCurrentTemp());
-      targetTemp.updateValue(this.getTargetTemp());
+    this.parent.emitter.on("vehicle_data", (data) => {
+      if (data.climate_state.is_climate_on === false) {
+        // Off
+        currentState.updateValue(this.platform.Characteristic.CurrentHeatingCoolingState.OFF);
+        targetState.updateValue(this.platform.Characteristic.TargetHeatingCoolingState.OFF);
+      } else {
+        // On
+        currentState.updateValue(data.climate_state.inside_temp < data.climate_state.driver_temp_setting
+          ? this.platform.Characteristic.CurrentHeatingCoolingState.HEAT
+          : this.platform.Characteristic.CurrentHeatingCoolingState.COOL
+        );
+        targetState.updateValue(this.platform.Characteristic.TargetHeatingCoolingState.AUTO);
+      }
+
+      currentTemp.updateValue(data.climate_state.inside_temp);
+      targetTemp.updateValue(data.climate_state.driver_temp_setting);
     });
   }
 
-  getCurrentState(): number {
-    if (!this.parent.accessory.context?.climate_state.is_climate_on) {
-      return this.parent.platform.Characteristic.CurrentHeatingCoolingState.OFF;
-    }
-    if (this.getCurrentTemp() < this.getTargetTemp()) {
-      return this.parent.platform.Characteristic.CurrentHeatingCoolingState
-        .HEAT;
-    }
-    return this.parent.platform.Characteristic.CurrentHeatingCoolingState.COOL;
+  async setTargetState(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
+    await this.vehicle.wake_up()
+      .then(() => value
+        ? this.vehicle
+          .auto_conditioning_start()
+          .then(
+            () =>
+              characteristic.updateValue(this.parent.platform.Characteristic.TargetHeatingCoolingState.AUTO)
+          )
+        : this.vehicle
+          .auto_conditioning_stop()
+          .then(
+            () =>
+              characteristic.updateValue(this.parent.platform.Characteristic.TargetHeatingCoolingState.OFF)
+          ));
   }
 
-  getTargetState(): number {
-    if (!this.parent.accessory.context?.climate_state?.is_climate_on) {
-      return this.parent.platform.Characteristic.TargetHeatingCoolingState.OFF;
-    }
-    return this.parent.platform.Characteristic.TargetHeatingCoolingState.AUTO;
-  }
-
-  async setTargetState(value: CharacteristicValue) {
-    return value
-      ? this.parent.vehicle
-        .auto_conditioning_start()
-        .then(
-          () =>
-            this.parent.platform.Characteristic.TargetHeatingCoolingState.AUTO
-        )
-      : this.parent.vehicle
-        .auto_conditioning_stop()
-        .then(
-          () =>
-            this.parent.platform.Characteristic.TargetHeatingCoolingState.OFF
-        );
-  }
-
-  getCurrentTemp(): number {
-    return this.parent.accessory.context?.climate_state?.inside_temp ?? 0;
-  }
-
-  getTargetTemp(): number {
-    return (
-      this.parent.accessory.context?.climate_state?.driver_temp_setting ?? 10
-    );
-  }
-
-  async setTargetTemp(value: CharacteristicValue) {
-    return this.parent.vehicle
-      .set_temps(value as number, value as number)
-      .then(() => value);
+  async setTargetTemp(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
+    await this.vehicle.wake_up().then(() =>
+      this.vehicle.set_temps(value as number, value as number)
+        .then(() => characteristic.updateValue(value)));
   }
 }

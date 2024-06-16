@@ -1,39 +1,39 @@
-import { CharacteristicValue } from "homebridge";
+import { Characteristic, CharacteristicValue } from "homebridge";
+import { VehicleDataResponse } from "tesla-fleet-api/dist/types/vehicle_data.js";
 import { debounce } from "../utils/debounce.js";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 
 export class ChargeCurrentService extends BaseService {
+
+  min: number = 2;
+  max: number = 16;
+
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.Lightbulb, "charge current", "charge_current");
+    super(parent, parent.platform.Service.Lightbulb, "Charge Current", "charge_current");
 
     const on = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.On)
-      .onGet(this.getOn.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.On);
+    //.onGet(this.getOn.bind(this));
 
     const level = this.service
       .getCharacteristic(this.parent.platform.Characteristic.Brightness)
-      .onGet(this.getLevel.bind(this))
-      .onSet(debounce(this.setLevel.bind(this), 3000));
+      //.onGet(this.getLevel.bind(this))
+      .onSet(debounce((value) => this.setLevel(value, level), 3000));
 
-    this.parent.emitter.on("vehicle_data", () => {
-      on.updateValue(this.getOn());
-      level.updateValue(this.getLevel());
+    this.parent.emitter.on("vehicle_data", (data) => {
+      on.updateValue(true);
+      this.max = data.charge_state.charge_current_request_max;
+      level.updateValue(data.charge_state.charge_current_request);
     });
   }
 
-  getOn(): boolean {
-    return !!this.parent.accessory.context?.charge_state;
-  }
+  async setLevel(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
+    value = Math.max(this.min, Math.min(this.max, value as number));
 
-  getLevel(): number {
-    return this.parent.accessory.context?.charge_state?.charge_current_request ?? 16;
-  }
-
-  setLevel(value: CharacteristicValue): Promise<number> {
-    const min = 2;
-    const max = this.parent.accessory.context.charge_state.charge_current_request_max ?? 32;
-    value = Math.max(min, Math.min(max, value as number));
-    return this.parent.vehicle.set_charge_limit(value).then(() => value);
+    await this.parent.vehicle.wake_up()
+      .then(() => this.parent.vehicle.set_charging_amps(value))
+      .then(() => characteristic.updateValue(value));
+    //.then(() => value); //to confirm this is okay
   }
 }

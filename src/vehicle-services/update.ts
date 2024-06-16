@@ -10,44 +10,25 @@ export class UpdateService extends BaseService {
     const readiness = this.service
       .getCharacteristic(
         this.parent.platform.Characteristic.FirmwareUpdateReadiness
-      )
-      .onGet(this.getReadiness.bind(this));
+      );
+    //.onGet(this.getReadiness.bind(this));
 
     const status = this.service
       .getCharacteristic(
         this.parent.platform.Characteristic.FirmwareUpdateStatus
-      )
-      .onGet(this.getStatus.bind(this));
+      );
+    //.onGet(this.getStatus.bind(this));
 
     const staged = this.service
       .getCharacteristic(
         this.parent.platform.Characteristic.StagedFirmwareVersion
-      )
-      .onGet(this.getStaged.bind(this));
+      );
+    //.onGet(this.getStaged.bind(this));
 
-    this.parent.emitter.on("vehicle_data", () => {
-      readiness.updateValue(this.getReadiness());
-      status.updateValue(this.getStatus());
-      staged.updateValue(this.getStaged());
+    this.parent.emitter.on("vehicle_data", (data) => {
+      readiness.updateValue(data.vehicle_state.software_update?.status === "downloaded");
+      status.updateValue(data.vehicle_state.software_update?.status || "No update");
+      staged.updateValue(data.vehicle_state.software_update?.version);
     });
-  }
-
-  getReadiness(): boolean {
-    return (
-      this.parent.accessory?.context?.vehicle_state?.software_update?.status ===
-      "downloaded"
-    );
-  }
-
-  getStatus(): string {
-    return (
-      this.parent.accessory?.context?.vehicle_state?.software_update?.status ||
-      "No update"
-    );
-  }
-
-  getStaged(): string {
-    return this.parent.accessory?.context?.vehicle_state?.software_update
-      ?.version;
   }
 }

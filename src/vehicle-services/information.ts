@@ -29,18 +29,12 @@ export class AccessoryInformationService {
       .onSet(this.setIdentify.bind(this));
 
     const version = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.FirmwareRevision)
-      .onGet(this.getVersion.bind(this));
+      .getCharacteristic(this.parent.platform.Characteristic.FirmwareRevision);
+    //.onGet(this.getVersion.bind(this));
 
-    this.parent.emitter.on("vehicle_data", () => {
-      version.updateValue(this.getVersion());
+    this.parent.emitter.on("vehicle_data", (data) => {
+      version.updateValue(data.vehicle_state.car_version);
     });
-  }
-
-  getVersion(): string {
-    return (
-      this.parent.accessory.context?.vehicle_state?.car_version ?? "unknown"
-    );
   }
 
   async setIdentify(): Promise<void> {
