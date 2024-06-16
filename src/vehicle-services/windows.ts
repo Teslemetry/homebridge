@@ -28,20 +28,24 @@ export class WindowService extends BaseService {
   }
 
   getPosition(): number {
-    return this.parent.accessory.context?.vehicle_state?.fd_window |
-      this.parent.accessory.context?.vehicle_state?.fp_window |
-      this.parent.accessory.context?.vehicle_state?.rd_window |
-      this.parent.accessory.context?.vehicle_state?.rp_window
-      ? 100
-      : 0;
+    if (!this.parent.accessory.context?.vehicle_state) {
+      return 0;
+    }
+    return this.parent.accessory.context.vehicle_state.fd_window * 25 +
+      this.parent.accessory.context.vehicle_state.fp_window * 25 +
+      this.parent.accessory.context.vehicle_state.rd_window * 25 +
+      this.parent.accessory.context.vehicle_state.rp_window * 25;
   }
 
-  async setPosition(value: CharacteristicValue) {
-    const { latitude, longitude } =
-      this.parent.accessory.context?.drive_state ?? {};
+  async setPosition(value: CharacteristicValue): Promise<void> {
+    if (value === 100 || value === 0) {
 
-    return this.parent.vehicle
-      .window_control(value === 100 ? "close" : "vent", latitude, longitude)
-      .then(() => value);
+      this.log.info("Setting windows to", value);
+      const { latitude, longitude } =
+        this.parent.accessory.context?.drive_state ?? {};
+
+      await this.parent.vehicle
+        .window_control(value === 100 ? "vent" : "close", latitude, longitude);
+    }
   }
 }
