@@ -1,5 +1,4 @@
 import { Characteristic, CharacteristicValue } from "homebridge";
-import { VehicleDataResponse } from "tesla-fleet-api/dist/types/vehicle_data.js";
 import { debounce } from "../utils/debounce.js";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";

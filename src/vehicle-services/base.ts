@@ -35,11 +35,5 @@ export abstract class BaseService {
     this.service =
       this.parent.accessory.getServiceById(definition, subtype) ||
       this.parent.accessory.addService(definition, name, subtype);
-
-    console.log(this.service.getCharacteristic(this.parent.platform.Characteristic.Name).value);
-    /*this.service.updateCharacteristic(
-      this.parent.platform.Characteristic.Name,
-      name
-    );*/
   }
 }

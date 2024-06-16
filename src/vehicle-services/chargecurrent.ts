@@ -1,5 +1,4 @@
 import { Characteristic, CharacteristicValue } from "homebridge";
-import { VehicleDataResponse } from "tesla-fleet-api/dist/types/vehicle_data.js";
 import { debounce } from "../utils/debounce.js";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
@@ -34,6 +33,5 @@ export class ChargeCurrentService extends BaseService {
     await this.parent.vehicle.wake_up()
       .then(() => this.parent.vehicle.set_charging_amps(value))
       .then(() => characteristic.updateValue(value));
-    //.then(() => value); //to confirm this is okay
   }
 }
