@@ -12,7 +12,7 @@ export class ChargeCurrentService extends BaseService {
       .onGet(this.getOn.bind(this));
 
     const level = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.ChargingState)
+      .getCharacteristic(this.parent.platform.Characteristic.Brightness)
       .onGet(this.getLevel.bind(this))
       .onSet(debounce(this.setLevel.bind(this), 3000));
 
@@ -32,7 +32,7 @@ export class ChargeCurrentService extends BaseService {
 
   setLevel(value: CharacteristicValue): Promise<number> {
     const min = 2;
-    const max = this.parent.accessory.context.charge_state.charge_current_request_max ?? 100;
+    const max = this.parent.accessory.context.charge_state.charge_current_request_max ?? 32;
     value = Math.max(min, Math.min(max, value as number));
     return this.parent.vehicle.set_charge_limit(value).then(() => value);
   }

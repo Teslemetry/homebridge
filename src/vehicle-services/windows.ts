@@ -6,7 +6,7 @@ import { BaseService } from "./base.js";
 
 export class WindowService extends BaseService {
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.Window, "windows", "vent_windows");
+    super(parent, parent.platform.Service.Window, "vent windows", "vent_windows");
 
     const currentPosition = this.service
       .getCharacteristic(this.parent.platform.Characteristic.CurrentPosition)

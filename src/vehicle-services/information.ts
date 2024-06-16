@@ -19,6 +19,10 @@ export class AccessoryInformationService {
       .setCharacteristic(
         this.parent.platform.Characteristic.SerialNumber,
         this.parent.vehicle.vin
+      )
+      .setCharacteristic(
+        this.parent.platform.Characteristic.Name,
+        this.parent.accessory.displayName
       );
 
     this.service.getCharacteristic(this.parent.platform.Characteristic.Identify)

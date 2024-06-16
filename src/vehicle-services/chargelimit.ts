@@ -3,16 +3,16 @@ import { debounce } from "../utils/debounce.js";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 
-export class BatteryService extends BaseService {
+export class ChargeLimitService extends BaseService {
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.Lightbulb, "charge", "charge");
+    super(parent, parent.platform.Service.Lightbulb, "charge limit", "charge_limit");
 
     const on = this.service
       .getCharacteristic(this.parent.platform.Characteristic.On)
       .onGet(this.getOn.bind(this));
 
     const level = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.ChargingState)
+      .getCharacteristic(this.parent.platform.Characteristic.Brightness)
       .onGet(this.getLevel.bind(this))
       .onSet(debounce(this.setLevel.bind(this), 3000));
 
@@ -23,8 +23,7 @@ export class BatteryService extends BaseService {
   }
 
   getOn(): boolean {
-    return this.parent.accessory.context?.charge_state?.user_charge_enable_request
-      ?? this.parent.accessory.context?.charge_state?.charge_enable_request;
+    return !!this.parent.accessory.context?.charge_state;
   }
 
   getLevel(): number {

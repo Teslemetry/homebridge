@@ -10,10 +10,15 @@ import {
   VehicleState,
 } from "tesla-fleet-api/dist/types/vehicle_data";
 import { TeslaFleetApiPlatform } from "./platform.js";
-import { BatteryService } from "./services/battery.js";
-import { DoorService } from "./services/door.js";
-import { AccessoryInformationService } from "./services/information.js";
-import { ClimateService } from "./services/climate.js";
+import { BatteryService } from "./vehicle-services/battery.js";
+import { ChargeCurrentService } from "./vehicle-services/chargecurrent.js";
+import { ChargeLimitService } from "./vehicle-services/chargelimit.js";
+import { ChargePortService } from "./vehicle-services/chargeport.js";
+import { ChargeSwitchService } from "./vehicle-services/chargeswitch.js";
+import { ClimateService } from "./vehicle-services/climate.js";
+import { DoorService } from "./vehicle-services/door.js";
+import { AccessoryInformationService } from "./vehicle-services/information.js";
+import { WindowService } from "./vehicle-services/windows.js";
 import { REFRESH_INTERVAL } from "./settings.js";
 import { EventEmitter } from "./utils/event.js";
 
@@ -58,9 +63,14 @@ export class VehicleAccessory {
 
     new AccessoryInformationService(this);
     new BatteryService(this);
+    new ClimateService(this);
+    new ChargeCurrentService(this);
+    new ChargeLimitService(this);
+    new ChargePortService(this);
+    new ChargeSwitchService(this);
     new DoorService(this, "front");
     new DoorService(this, "rear");
-    new ClimateService(this);
+    new WindowService(this);
   }
 
   async refresh(): Promise<void> {

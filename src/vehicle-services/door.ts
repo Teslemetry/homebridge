@@ -11,7 +11,7 @@ export class DoorService extends BaseService {
     super(
       parent,
       parent.platform.Service.Door,
-      trunk === "front" ? "Frunk" : "Trunk",
+      trunk === "front" ? "frunk" : "trunk",
       trunk
     );
 

@@ -1,5 +1,6 @@
 import {
   API,
+  Categories,
   Characteristic,
   DynamicPlatformPlugin,
   Logging,
@@ -48,10 +49,53 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
     // Dynamic Platform plugins should only register new accessories after this event was fired,
     // in order to ensure they weren't added to homebridge already. This event can also be used
     // to start discovery of new accessories.
-    this.api.on("didFinishLaunching", () => {
+    this.api.on("didFinishLaunching", async () => {
       log.debug("Executed didFinishLaunching callback");
       // run the method to discover / register your devices as accessories
-      this.discoverDevices();
+      const newAccessories: PlatformAccessory<VehicleContext>[] = [];
+      this.TeslaFleetApi.products_by_type()
+        .then(async ({ vehicles, energy_sites }) => {
+          vehicles.forEach(async (product) => {
+            this.TeslaFleetApi.vehicle!;
+            const uuid = this.api.hap.uuid.generate(product.vin);
+            const cachedAccessory = this.accessories.find(
+              (accessory) => accessory.UUID === uuid
+            );
+            if (cachedAccessory) {
+              cachedAccessory.context.state = product.state;
+              cachedAccessory.displayName = product.display_name;
+              this.log.info(
+                "Restoring existing accessory from cache:",
+                cachedAccessory.displayName
+              );
+              new VehicleAccessory(this, cachedAccessory);
+              return;
+            }
+
+            this.log.info("Adding new accessory:", product.display_name);
+            const newAccessory = new this.api.platformAccessory<VehicleContext>(
+              product.display_name,
+              uuid,
+              Categories.OTHER
+            );
+            log.info(newAccessory.displayName);
+            newAccessory.context.vin = product.vin;
+            newAccessory.context.state = product.state;
+            newAccessory.displayName = product.display_name;
+
+
+            new VehicleAccessory(this, newAccessory);
+            newAccessories.push(newAccessory);
+          });
+
+          energy_sites.forEach((product) => { });
+
+
+        }).then(() => this.api.registerPlatformAccessories(
+          PLUGIN_NAME,
+          PLATFORM_NAME,
+          newAccessories
+        ));
     });
   }
 
@@ -72,45 +116,6 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-    //const newAccessories: PlatformAccessory<VehicleContext>[] = [];
-    this.TeslaFleetApi.products_by_type()
-      .then(async ({ vehicles, energy_sites }) => {
-        vehicles.forEach(async (product) => {
-          this.TeslaFleetApi.vehicle!;
-          const uuid = this.api.hap.uuid.generate(product.vin);
-          const cachedAccessory = this.accessories.find(
-            (accessory) => accessory.UUID === uuid
-          );
-          if (cachedAccessory) {
-            cachedAccessory.context.state = product.state;
-            cachedAccessory.displayName = product.display_name;
-            this.log.info(
-              "Restoring existing accessory from cache:",
-              cachedAccessory.displayName
-            );
-            new VehicleAccessory(this, cachedAccessory);
-            return;
-          }
 
-          this.log.info("Adding new accessory:", product.display_name);
-          const newAccessory = new this.api.platformAccessory<VehicleContext>(
-            product.display_name,
-            uuid
-          );
-          newAccessory.context.vin = product.vin;
-          newAccessory.context.state = product.state;
-          newAccessory.displayName = product.display_name;
-
-
-          new VehicleAccessory(this, newAccessory);
-          this.api.registerPlatformAccessories(
-            PLUGIN_NAME,
-            PLATFORM_NAME,
-            [newAccessory]
-          );
-        });
-
-        energy_sites.forEach((product) => { });
-      });
   }
 }
