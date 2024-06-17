@@ -1,5 +1,6 @@
 {
-  "displayName": "Teslemetry",
+  "private": "true",
+  "displayName": "Development Branch",
   "name": "homebridge-teslemetry",
   "description": "Connect Homebridge to your Teslemetry account.",
   "version": "0.1.0",
