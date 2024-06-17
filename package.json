@@ -2,7 +2,7 @@
   "private": false,
   "displayName": "Teslemetry",
   "name": "homebridge-teslemetry",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Connect Homebridge to your Teslemetry account.",
   "license": "Apache-2.0",
   "type": "module",
