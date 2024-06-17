@@ -1,6 +1,6 @@
 {
-  "private": "true",
-  "displayName": "Development Branch",
+  "private": false,
+  "displayName": "Teslemetry",
   "name": "homebridge-teslemetry",
   "description": "Connect Homebridge to your Teslemetry account.",
   "homepage": "https://github.com/Teslemetry/homebridge/tree/dev?tab=readme-ov-file",
