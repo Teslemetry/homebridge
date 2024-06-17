@@ -3,7 +3,7 @@
   "displayName": "Teslemetry",
   "name": "homebridge-teslemetry",
   "version": "0.0.2",
-  "description": "A short description about what your plugin does.",
+  "description": "Connect Homebridge to your Teslemetry account.",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {
