@@ -78,14 +78,7 @@ export class VehicleAccessory {
   }
 
   async refresh(): Promise<void> {
-    this.vehicle
-      .vehicle_data([
-        "charge_state",
-        "climate_state",
-        "drive_state",
-        "location_data",
-        "vehicle_state",
-      ])
+    this.platform.TeslaFleetApi.state(this.accessory.context.vin)
       .then((data) => {
         this.accessory.context.state = data.state;
         this.emitter.emit("vehicle_data", data);
@@ -109,18 +102,12 @@ export class VehicleAccessory {
     if (this.accessory.context.state === "online") {
       return Promise.resolve();
     }
-    await this.vehicle.wake_up();
-
-    let interval = 2000;
-    for (let x = 0; x < 5; x++) {
-      await new Promise((resolve) => setTimeout(resolve, interval));
-      const { state } = await this.vehicle.vehicle();
-      this.accessory.context.state = state;
-      if (state === "online") {
+    return this.platform.TeslaFleetApi.wake(this.accessory.context.vin).then(awake => {
+      if (awake) {
+        this.accessory.context.state = "online";
         return Promise.resolve();
       }
-      interval = interval + 2000;
-    }
-    return Promise.reject("Vehicle didn't wake up");
+      return Promise.reject("Vehicle did not wake up");
+    });
   }
 }

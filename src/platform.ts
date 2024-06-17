@@ -13,7 +13,7 @@ import { EnergyAccessory, EnergyContext } from "./energy.js";
 import { PLATFORM_NAME, PLUGIN_NAME } from "./settings.js";
 import { VehicleAccessory, VehicleContext } from "./vehicle.js";
 
-import { Teslemetry } from "tesla-fleet-api";
+import { Tessie } from "tesla-fleet-api";
 
 /**
  * HomebridgePlatform
@@ -23,7 +23,7 @@ import { Teslemetry } from "tesla-fleet-api";
 export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service;
   public readonly Characteristic: typeof Characteristic;
-  public readonly TeslaFleetApi: Teslemetry;
+  public readonly TeslaFleetApi: Tessie;
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory<
@@ -38,7 +38,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
 
-    this.TeslaFleetApi = new Teslemetry(this.config.accessToken);
+    this.TeslaFleetApi = new Tessie(this.config.accessToken);
 
     this.log.debug("Finished initializing platform:", this.config.accessToken);
 
