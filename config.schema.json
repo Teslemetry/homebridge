@@ -1,8 +1,8 @@
 {
-  "pluginAlias": "Teslemetry",
+  "pluginAlias": "Tessie",
   "pluginType": "platform",
   "singular": false,
-  "headerDisplay": "Requires an active subscription to Teslemetry. Please login and create an access token at teslemetry.com",
+  "headerDisplay": "Requires an active subscription to Tessie. Please login and create an access token at https://my.tessie.com/settings/api",
   "schema": {
     "type": "object",
     "properties": {
@@ -11,7 +11,7 @@
         "description": "A unique name for the platform",
         "type": "string",
         "required": true,
-        "default": "Teslemetry"
+        "default": "Tessie"
       },
       "accessToken": {
         "title": "Access Token",

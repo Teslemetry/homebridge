@@ -1,10 +1,10 @@
 {
-  "private": "true",
-  "displayName": "Development Branch",
-  "name": "homebridge-teslemetry",
-  "description": "Connect Homebridge to your Teslemetry account.",
-  "homepage": "https://github.com/Teslemetry/homebridge/tree/dev?tab=readme-ov-file",
-  "repository": "github:teslemetry/homebridge#dev",
+  "private": false,
+  "displayName": "Tessie",
+  "name": "homebridge-tessie",
+  "description": "Connect Homebridge to your Tessie account.",
+  "homepage": "https://github.com/Teslemetry/homebridge/tree/tessie?tab=readme-ov-file",
+  "repository": "github:teslemetry/homebridge#tessie",
   "bugs": {
     "url": "https://github.com/teslemetry/homebridge/issues/new/choose"
   },
