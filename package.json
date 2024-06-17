@@ -1,9 +1,8 @@
 {
-  "private": false,
   "displayName": "Teslemetry",
   "name": "homebridge-teslemetry",
-  "version": "0.0.3",
   "description": "Connect Homebridge to your Teslemetry account.",
+  "version": "0.0.3",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {
