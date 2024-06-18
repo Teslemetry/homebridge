@@ -13,20 +13,18 @@ export class ChargePortService extends BaseService {
     const targetState = this.service
       .getCharacteristic(this.parent.platform.Characteristic.LockTargetState)
       //.onGet(this.getState.bind(this))
-      .onSet((value) => this.setState(value, targetState));
+      .onSet((value) => this.setState(value, currentState)); // Set current instead
 
     this.parent.emitter.on("vehicle_data", (data) => {
-      const state = (data.charge_state.charge_port_latch === "Engaged") ?
-        this.platform.Characteristic.LockTargetState.SECURED :
-        this.platform.Characteristic.LockTargetState.UNSECURED;
+      const state = (data.charge_state.charge_port_latch === "Engaged") ? 1 : 0;
       currentState.updateValue(state);
       targetState.updateValue(state);
     });
   }
 
   async setState(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
-    await this.vehicle.wake_up().then(() =>
-      value === this.parent.platform.Characteristic.LockTargetState.SECURED ?
+    await this.accessory.wakeUpAndWait().then(() =>
+      value === 1 ?
         this.vehicle.charge_port_door_close()
           .then(() =>
             characteristic.updateValue(this.parent.platform.Characteristic.LockTargetState.SECURED)

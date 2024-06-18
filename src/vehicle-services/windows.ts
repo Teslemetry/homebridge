@@ -37,7 +37,7 @@ export class WindowService extends BaseService {
     const { latitude, longitude } =
       this.parent.accessory.context?.drive_state ?? {};
 
-    await this.parent.vehicle.wake_up()
+    await this.parent.wakeUpAndWait()
       .then(() => this.parent.vehicle.window_control(value === 100 ? "vent" : "close", latitude, longitude))
       .then(() => characteristic.updateValue(value));
   }

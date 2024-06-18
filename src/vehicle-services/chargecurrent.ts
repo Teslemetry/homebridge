@@ -30,7 +30,7 @@ export class ChargeCurrentService extends BaseService {
   async setLevel(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
     value = Math.max(this.min, Math.min(this.max, value as number));
 
-    await this.parent.vehicle.wake_up()
+    await this.accessory.wakeUpAndWait()
       .then(() => this.parent.vehicle.set_charging_amps(value))
       .then(() => characteristic.updateValue(value));
   }

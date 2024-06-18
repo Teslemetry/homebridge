@@ -106,7 +106,7 @@ export class VehicleAccessory {
       });
   }
 
-  async wake_up(): Promise<void> {
+  async wakeUpAndWait(): Promise<void> {
     if (this.accessory.context.state === "online") {
       return Promise.resolve();
     }

@@ -38,6 +38,6 @@ export class AccessoryInformationService {
   }
 
   async setIdentify(): Promise<void> {
-    await this.parent.wake_up().then(() => this.parent.vehicle.flash_lights());
+    await this.parent.wakeUpAndWait().then(() => this.parent.vehicle.flash_lights());
   }
 }

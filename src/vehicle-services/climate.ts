@@ -63,7 +63,7 @@ export class ClimateService extends BaseService {
   }
 
   async setTargetState(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
-    await this.vehicle.wake_up()
+    await this.parent.wakeUpAndWait()
       .then(() => value
         ? this.vehicle
           .auto_conditioning_start()
@@ -80,7 +80,7 @@ export class ClimateService extends BaseService {
   }
 
   async setTargetTemp(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
-    await this.vehicle.wake_up().then(() =>
+    await this.parent.wakeUpAndWait().then(() =>
       this.vehicle.set_temps(value as number, value as number)
         .then(() => characteristic.updateValue(value)));
   }

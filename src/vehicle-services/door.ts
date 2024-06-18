@@ -45,7 +45,7 @@ export class DoorService extends BaseService {
       (!this.open && value > 50) ||
       (this.open && value < 50 && this.trunk === "rear")
     ) {
-      this.vehicle.wake_up()
+      this.parent.wakeUpAndWait()
         .then(() => this.parent.vehicle.actuate_truck(this.trunk))
         .then(() => characteristic.updateValue(value));
     }

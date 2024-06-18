@@ -25,7 +25,7 @@ export class LockService extends BaseService {
   async setState(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
     const open = value === this.parent.platform.Characteristic.LockTargetState.UNSECURED;
 
-    await this.parent.wake_up().then(() =>
+    await this.parent.wakeUpAndWait().then(() =>
       open ?
         this.parent.vehicle.door_lock()
           .then(() => characteristic.updateValue(this.parent.platform.Characteristic.LockTargetState.SECURED)) :

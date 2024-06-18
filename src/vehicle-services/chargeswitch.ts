@@ -22,7 +22,7 @@ export class ChargeSwitchService extends BaseService {
   }
 
   async setOn(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
-    await this.parent.wake_up().then(() =>
+    await this.parent.wakeUpAndWait().then(() =>
       value ? this.parent.vehicle.charge_start().then(() => characteristic.updateValue(value))
         : this.parent.vehicle.charge_stop().then(() => characteristic.updateValue(value))
     );
