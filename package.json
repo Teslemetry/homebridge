@@ -3,9 +3,6 @@
   "displayName": "Development Branch",
   "name": "homebridge-teslemetry",
   "description": "Connect Homebridge to your Teslemetry account.",
-  "version": "0.2.0",
-  "license": "Apache-2.0",
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/teslemetry/homebridge.git"
@@ -13,6 +10,9 @@
   "bugs": {
     "url": "https://github.com/teslemetry/homebridge/issues"
   },
+  "type": "module",
+  "license": "Apache-2.0",
+  "version": "0.2.0",
   "engines": {
     "node": "^18.17.0 || ^20.9.0",
     "homebridge": "^1.8.0"
