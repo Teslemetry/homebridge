@@ -2,7 +2,7 @@ set -e
 git checkout dev
 
 npm run prepublishOnly
-npm version minor
+npm version patch
 git push
 
 git checkout teslemetry
