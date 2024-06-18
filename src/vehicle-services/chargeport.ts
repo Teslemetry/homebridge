@@ -23,7 +23,7 @@ export class ChargePortService extends BaseService {
   }
 
   async setState(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
-    await this.accessory.wakeUpAndWait().then(() =>
+    await this.parent.wakeUpAndWait().then(() =>
       value === 1 ?
         this.vehicle.charge_port_door_close()
           .then(() =>
