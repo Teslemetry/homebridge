@@ -20,7 +20,6 @@ export class DoorService extends BaseService {
 
     const currentPosition = this.service
       .getCharacteristic(this.parent.platform.Characteristic.CurrentPosition);
-    //.onGet(this.getPosition.bind(this));
 
     /*const positionState = this.service
       .getCharacteristic(this.parent.platform.Characteristic.PositionState)
@@ -28,8 +27,20 @@ export class DoorService extends BaseService {
 
     const targetPosition = this.service
       .getCharacteristic(this.parent.platform.Characteristic.TargetPosition)
-      //.onGet(this.getPosition.bind(this))
-      .onSet((value) => this.setPosition(value, targetPosition));
+      .onSet(async (value) => {
+        targetPosition.updateValue(value);
+        value = value as number;
+        if (
+          (!this.open && value > 50) ||
+          (this.open && value < 50 && this.trunk === "rear")
+        ) {
+          await this.parent.wakeUpAndWait()
+            .then(() => this.parent.vehicle.actuate_truck(this.trunk))
+            .then(() => {
+              currentPosition.updateValue(value);
+            });
+        }
+      });
 
     this.parent.emitter.on("vehicle_data", (data) => {
       this.open = data.vehicle_state[this.key] === 1;
@@ -37,17 +48,5 @@ export class DoorService extends BaseService {
       currentPosition.updateValue(position);
       targetPosition.updateValue(position);
     });
-  }
-
-  async setPosition(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
-    value = value as number;
-    if (
-      (!this.open && value > 50) ||
-      (this.open && value < 50 && this.trunk === "rear")
-    ) {
-      this.parent.wakeUpAndWait()
-        .then(() => this.parent.vehicle.actuate_truck(this.trunk))
-        .then(() => characteristic.updateValue(value));
-    }
   }
 }

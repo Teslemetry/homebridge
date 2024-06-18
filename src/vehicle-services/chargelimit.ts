@@ -13,11 +13,9 @@ export class ChargeLimitService extends BaseService {
 
     const on = this.service
       .getCharacteristic(this.parent.platform.Characteristic.On);
-    //.onGet(this.getOn.bind(this));
 
     const level = this.service
       .getCharacteristic(this.parent.platform.Characteristic.Brightness)
-      //.onGet(this.getLevel.bind(this))
       .onSet(debounce((value) => this.setLevel(value, level), 3000));
 
     this.parent.emitter.on("vehicle_data", (data) => {

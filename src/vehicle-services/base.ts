@@ -27,9 +27,9 @@ export abstract class BaseService {
     name = `${this.parent.accessory.displayName} ${name}`;
 
     if (this.parent.accessory.getServiceById(definition, subtype)) {
-      this.log.info(`Restoring ${this.accessory.displayName} service ${name}`);
+      this.log.info(`Restoring service ${name}`);
     } else {
-      this.log.info(`Creating ${this.accessory.displayName} service ${name}`);
+      this.log.info(`Creating service ${name}`);
     }
 
     this.service =
