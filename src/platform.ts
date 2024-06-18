@@ -57,7 +57,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
         .then(async ({ vehicles, energy_sites }) => {
           vehicles.forEach(async (product) => {
             this.TeslaFleetApi.vehicle!;
-            const uuid = this.api.hap.uuid.generate(product.vin);
+            const uuid = this.api.hap.uuid.generate(`${PLATFORM_NAME}:${product.vin}`);
             const cachedAccessory = this.accessories.find(
               (accessory) => accessory.UUID === uuid
             );
