@@ -1,6 +1,6 @@
 # Teslemetry for Home Bridge
 
-Connect your Homekit with all your Teslemetry vehicles and energy products
+Connect Homekit with all your Tesla vehicles and energy products using Teslemetry.
 
 ## Installation
 
@@ -19,8 +19,8 @@ Example config.json:
   "accessories": [
     {
       "accessory": "Teslemetry",
-      "name": "Teslemetry",
-      "accessToken": "abcdefg"
+      "name": "My Teslemetry",
+      "accessToken": "yftrro6x6d-szg3xo55d6-p057h4l7ys-856kt3nonx"
     }
   ]
 }
