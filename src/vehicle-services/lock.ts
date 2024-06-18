@@ -1,4 +1,3 @@
-import { Characteristic, CharacteristicValue } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 

@@ -10,7 +10,6 @@ export class WindowService extends BaseService {
 
     const currentPosition = this.service
       .getCharacteristic(this.parent.platform.Characteristic.CurrentPosition);
-    //.onGet(this.getPosition.bind(this));
 
     /*const positionState = this.service
       .getCharacteristic(this.parent.platform.Characteristic.PositionState)
@@ -18,7 +17,6 @@ export class WindowService extends BaseService {
 
     const targetPosition = this.service
       .getCharacteristic(this.parent.platform.Characteristic.TargetPosition)
-      //.onGet(this.getPosition.bind(this))
       .onSet((value) => this.setPosition(value, targetPosition));
 
     this.parent.emitter.on("vehicle_data", (data) => {

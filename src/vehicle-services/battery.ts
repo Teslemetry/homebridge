@@ -7,15 +7,12 @@ export class BatteryService extends BaseService {
 
     const batteryLevel = this.service
       .getCharacteristic(this.parent.platform.Characteristic.BatteryLevel);
-    //.onGet(this.getLevel.bind(this));
 
     const chargingState = this.service
       .getCharacteristic(this.parent.platform.Characteristic.ChargingState);
-    //.onGet(this.getChargingState.bind(this));
 
     const lowBattery = this.service
       .getCharacteristic(this.parent.platform.Characteristic.StatusLowBattery);
-    //.onGet(this.getLowBattery.bind(this));
 
     this.parent.emitter.on("vehicle_data", (data) => {
       batteryLevel.updateValue(this.getLevel(data));
