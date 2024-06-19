@@ -26,14 +26,24 @@ export abstract class BaseService {
 
     name = `${this.parent.accessory.displayName} ${name}`;
 
-    if (this.parent.accessory.getServiceById(definition, subtype)) {
+    if (this.accessory.getServiceById(definition, subtype)) {
       this.log.info(`Restoring service ${name}`);
     } else {
       this.log.info(`Creating service ${name}`);
     }
 
     this.service =
-      this.parent.accessory.getServiceById(definition, subtype) ||
-      this.parent.accessory.addService(definition, name, subtype);
+      this.accessory.getServiceById(definition, subtype) ||
+      this.accessory.addService(definition, name, subtype);
+
+    // Set the configured name if it's not already set since Homekit wont use the display name
+    const ConfiguredName = this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName);
+    if (!ConfiguredName.value) {
+      this.log.debug(`Configured name changing to ${name}`);
+      ConfiguredName.updateValue(name);
+    } else {
+      this.log.debug(`Configured name of ${name} is already set to ${ConfiguredName.value}`);
+    }
+
   }
 }
