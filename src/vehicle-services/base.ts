@@ -24,7 +24,7 @@ export abstract class BaseService {
     this.emitter = parent.emitter;
     this.vehicle = parent.vehicle;
 
-    name = `${this.parent.accessory.displayName} ${name}`;
+    name = parent.platform.config.prefixName ? `${this.parent.accessory.displayName} ${name}` : name;
 
     if (this.accessory.getServiceById(definition, subtype)) {
       this.log.info(`Restoring service ${name}`);

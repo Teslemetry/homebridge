@@ -8,6 +8,7 @@
     "properties": {
       "name": {
         "title": "Name",
+        "description": "A unique name for the platform",
         "type": "string",
         "required": true,
         "default": "Teslemetry"
@@ -16,6 +17,13 @@
         "title": "Access Token",
         "type": "string",
         "required": true
+      },
+      "prefixName": {
+        "title": "Prefix Name",
+        "description": "Prefix the name of each service with the name of the vehicle",
+        "type": "boolean",
+        "required": false,
+        "default": true
       }
     }
   }
