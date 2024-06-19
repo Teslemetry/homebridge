@@ -1,11 +1,16 @@
 set -e
+git checkout dev
+
+npm run prepublishOnly
+npm version patch
+git push
 
 git checkout teslemetry
-rm -r dist
-npm publish
+git rebase dev
+git push --force-with-lease
 
 git checkout tessie
-rm -r dist
-npm publish
+git rebase dev
+git push --force-with-lease
 
 git checkout dev
