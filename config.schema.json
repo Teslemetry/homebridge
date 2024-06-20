@@ -22,8 +22,19 @@
         "title": "Prefix Name",
         "description": "Prefix the name of each service with the name of the vehicle",
         "type": "boolean",
-        "required": false,
         "default": true
+      },
+      "latitude": {
+        "title": "Latitude",
+        "type": "string",
+        "default": "",
+        "description": "Latitude of your Homelink device. Required to use Homelink."
+      },
+      "longitude": {
+        "title": "Longitude",
+        "type": "string",
+        "default": "",
+        "description": "Longitude of your Homelink device. Required to use Homelink."
       }
     }
   }
