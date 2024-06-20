@@ -73,14 +73,13 @@ export class VehicleAccessory {
     new DefrostService(this);
     new DoorService(this, "front");
     new DoorService(this, "rear");
-    new HomelinkService(this);
     new LockService(this);
     new SentryService(this);
     new WindowService(this);
     new WakeService(this);
 
     if (this.platform.config.latitude && this.platform.config.longitude) {
-      //
+      new HomelinkService(this);
     }
 
     // Get data and schedule refresh

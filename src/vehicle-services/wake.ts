@@ -9,7 +9,7 @@ export class WakeService extends BaseService {
       .getCharacteristic(this.parent.platform.Characteristic.On)
       .onSet(async (value) => {
         if (value) {
-          await this.parent.wakeUpAndWait().then(() => on.updateValue(value));
+          await this.parent.wakeUpAndWait().then(() => on.updateValue(true));
         }
       });
 
