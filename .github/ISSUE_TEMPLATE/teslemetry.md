@@ -1,6 +1,6 @@
 ---
 name: Issue for homebridge-teslemetry
-about: Create a bug report or support request for Homebridge Teslemetry
+about: Create a bug report or support request for the Teslemetry integration
 title: ''
 labels: teslemetry
 assignees: '@Bre77'

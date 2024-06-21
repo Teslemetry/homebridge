@@ -1,6 +1,6 @@
 ---
 name: Issue for homebridge-tessie
-about: Create a bug report or support request for Homebridge Tessie
+about: Create a bug report or support request for the Tessie integration
 title: ''
 labels: tessie
 assignees: '@Bre77'
