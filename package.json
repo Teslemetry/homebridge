@@ -3,10 +3,8 @@
   "displayName": "Development Branch",
   "name": "homebridge-teslemetry",
   "description": "Connect Homebridge to your Teslemetry account.",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/teslemetry/homebridge.git"
-  },
+  "homepage":"https://github.com/Teslemetry/homebridge/tre/dev?tab=readme-ov-file"
+  "repository": "github:teslemetry/homebridge#dev,
   "bugs": {
     "url": "https://github.com/teslemetry/homebridge/issues"
   },
