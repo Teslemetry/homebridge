@@ -1,15 +1,15 @@
 ---
-name: Bug Report
-about: Create a report to help us improve
+name: Issue for homebridge-teslemetry
+about: Create a bug report or support request for Homebridge Teslemetry
 title: ''
-labels: bug
-assignees: ''
+labels: teslemetry
+assignees: '@Bre77'
 
 ---
 
 <!-- You must use the issue template below when submitting a bug -->
 
-**Describe The Bug:**
+**Describe The Issue:**
 <!-- A clear and concise description of what the bug is. -->
 
 **To Reproduce:**
@@ -24,21 +24,11 @@ assignees: ''
 Show the Homebridge logs here, remove any sensitive information.
 ```
 
-**Plugin Config:**
-
-```json
-Show your Homebridge config.json here, remove any sensitive information.
-```
-
 **Screenshots:**
 <!-- If applicable, add screenshots to help explain your problem. -->
 
 **Environment:**
 
 * **Plugin Version**:
-* **Homebridge Version**: <!-- homebridge -V -->
-* **Node.js Version**: <!-- node -v -->
-* **NPM Version**: <!-- npm -v -->
-* **Operating System**: <!-- Raspbian / Ubuntu / Debian / Windows / macOS / Docker / hb-service -->
 
 <!-- Click the "Preview" tab before you submit to ensure the formatting is correct. -->
