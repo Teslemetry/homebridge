@@ -3,8 +3,8 @@
   "displayName": "Teslemetry",
   "name": "homebridge-teslemetry",
   "description": "Connect Homebridge to your Teslemetry account.",
-  "homepage": "https://github.com/Teslemetry/homebridge/tree/dev?tab=readme-ov-file",
-  "repository": "github:teslemetry/homebridge#dev",
+  "homepage": "https://github.com/Teslemetry/homebridge/tree/teslemetry?tab=readme-ov-file",
+  "repository": "github:teslemetry/homebridge#teslemetry",
   "bugs": {
     "url": "https://github.com/teslemetry/homebridge/issues/new/choose"
   },
