@@ -41,6 +41,7 @@ export type VehicleContext = {
 
 export interface VehicleDataEvent {
   vehicle_data(data: VehicleDataResponse): void;
+  offline(): void;
 }
 
 export class VehicleAccessory {
@@ -105,15 +106,18 @@ export class VehicleAccessory {
         this.accessory.context.vehicle_state = data.vehicle_state;
         this.emitter.emit("vehicle_data", data);
       })
-      .catch((data) => {
-        if (data?.status === 408) {
+      .catch(({ status, data }) => {
+        if (status === 408) {
+          this.platform.log.debug(`${this.accessory.displayName} is offline`);
           this.accessory.context.state = "offline";
+          this.emitter.emit("offline");
           return;
         }
         if (data?.error) {
-          this.platform.log.warn(data.error);
+          this.platform.log.warn(`${this.accessory.displayName} return status ${status}: ${data.error}`);
+          return;
         }
-        this.platform.log.error(data);
+        this.platform.log.error(`${this.accessory.displayName} return status ${status}: ${data}`);
       });
   }
 

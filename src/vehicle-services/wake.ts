@@ -16,5 +16,6 @@ export class WakeService extends BaseService {
     this.parent.emitter.on("vehicle_data", (data) => {
       on.updateValue(data.state === "online");
     });
+    this.parent.emitter.on("offline", () => on.updateValue(false));
   }
 }

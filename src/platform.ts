@@ -64,7 +64,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
             if (cachedAccessory) {
               cachedAccessory.context.state = product.state;
               cachedAccessory.displayName = product.display_name;
-              this.log.info(
+              this.log.debug(
                 "Restoring existing accessory from cache:",
                 cachedAccessory.displayName
               );
@@ -72,13 +72,12 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
               return;
             }
 
-            this.log.info("Adding new accessory:", product.display_name);
+            this.log.debug("Adding new accessory:", product.display_name);
             const newAccessory = new this.api.platformAccessory<VehicleContext>(
               product.display_name,
               uuid,
               Categories.OTHER
             );
-            log.info(newAccessory.displayName);
             newAccessory.context.vin = product.vin;
             newAccessory.context.state = product.state;
             newAccessory.displayName = product.display_name;
@@ -104,7 +103,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
    * It should be used to set up event handlers for characteristics and update respective values.
    */
   configureAccessory(accessory: PlatformAccessory<VehicleContext>) {
-    this.log.info("Loading accessory from cache:", accessory.displayName);
+    this.log.debug("Loading accessory from cache:", accessory.displayName);
 
     // add the restored accessory to the accessories cache, so we can track if it has already been registered
     this.accessories.push(accessory);
