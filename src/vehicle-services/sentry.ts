@@ -12,7 +12,6 @@ export class SentryService extends BaseService {
       .getCharacteristic(this.parent.platform.Characteristic.SecuritySystemTargetState)
       .onSet(async (value) => {
         value = value === 3 ? 3 : 1;
-        console.log(value);
         target.updateValue(value);
         await this.parent.wakeUpAndWait()
           .then(() => this.vehicle.set_sentry_mode(value !== 3))

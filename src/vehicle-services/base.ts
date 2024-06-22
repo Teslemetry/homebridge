@@ -26,12 +26,6 @@ export abstract class BaseService {
 
     name = parent.platform.config.prefixName ? `${this.parent.accessory.displayName} ${name}` : name;
 
-    if (this.accessory.getServiceById(definition, subtype)) {
-      this.log.info(`Restoring service ${name}`);
-    } else {
-      this.log.info(`Creating service ${name}`);
-    }
-
     this.service =
       this.accessory.getServiceById(definition, subtype) ||
       this.accessory.addService(definition, name, subtype);
