@@ -19,7 +19,7 @@ Example config.json:
   "platforms": [
     {
             "name": "Teslemetry",
-            "accessToken": "Your Teslemetry access token",
+            "accessToken": "YOUR_TESLEMETRY_API_TOKEN",
             "prefixName": true,
             "platform": "Teslemetry"
         }
