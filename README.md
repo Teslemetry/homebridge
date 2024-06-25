@@ -16,12 +16,13 @@ Example config.json:
 
 ```json
 {
-  "accessories": [
+  "platforms": [
     {
-      "accessory": "Teslemetry",
-      "name": "My Teslemetry",
-      "accessToken": "YOUR_TESLEMETRY_API_TOKEN"
-    }
+            "name": "Teslemetry",
+            "accessToken": "YOUR_TESLEMETRY_API_TOKEN",
+            "prefixName": true,
+            "platform": "Teslemetry"
+        }
   ]
 }
 ```
