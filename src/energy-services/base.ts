@@ -1,19 +1,19 @@
 import { Logging, PlatformAccessory, Service, WithUUID } from "homebridge";
-import { VehicleSpecific } from "tesla-fleet-api";
+import { EnergySpecific, } from "tesla-fleet-api";
 import { TeslaFleetApiPlatform } from "../platform.js";
 import { EventEmitter } from "../utils/event.js";
-import { VehicleAccessory, VehicleContext, VehicleDataEvent } from "../vehicle.js";
+import { EnergyAccessory, EnergyContext, EnergyDataEvent } from "../energy.js";
 
 export abstract class BaseService {
   protected service: Service;
   protected log: Logging;
   protected platform: TeslaFleetApiPlatform;
-  protected accessory: PlatformAccessory<VehicleContext>;
-  protected emitter: EventEmitter<VehicleDataEvent>;
-  protected vehicle: VehicleSpecific;
+  protected accessory: PlatformAccessory<EnergyContext>;
+  protected emitter: EventEmitter<EnergyDataEvent>;
+  protected energy: EnergySpecific;
 
   constructor(
-    protected parent: VehicleAccessory,
+    protected parent: EnergyAccessory,
     definition: WithUUID<typeof Service>,
     name: string,
     subtype: string,
@@ -22,7 +22,7 @@ export abstract class BaseService {
     this.platform = parent.platform;
     this.accessory = parent.accessory;
     this.emitter = parent.emitter;
-    this.vehicle = parent.vehicle;
+    this.energy = parent.energy;
 
     name = parent.platform.config.prefixName ? `${this.parent.accessory.displayName} ${name}` : name;
 

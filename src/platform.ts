@@ -11,6 +11,7 @@ import {
 
 import { PLATFORM_NAME, PLUGIN_NAME } from "./settings.js";
 import { VehicleAccessory, VehicleContext } from "./vehicle.js";
+import { EnergyAccessory, EnergyContext } from "./energy.js";
 
 import { Teslemetry } from "tesla-fleet-api";
 
@@ -25,7 +26,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
   public readonly TeslaFleetApi: Teslemetry;
 
   // this is used to track restored cached accessories
-  public readonly accessories: PlatformAccessory<VehicleContext>[] = [];
+  public readonly accessories: PlatformAccessory<VehicleContext | EnergyContext>[] = [];
 
   constructor(
     public readonly log: Logging,
@@ -52,49 +53,88 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
     this.api.on("didFinishLaunching", async () => {
       log.debug("Executed didFinishLaunching callback");
       // run the method to discover / register your devices as accessories
-      const newAccessories: PlatformAccessory<VehicleContext>[] = [];
-      this.TeslaFleetApi.products_by_type()
+
+      const { scopes } = await this.TeslaFleetApi.metadata();
+
+      await this.TeslaFleetApi.products_by_type()
         .then(async ({ vehicles, energy_sites }) => {
-          vehicles.forEach(async (product) => {
-            this.TeslaFleetApi.vehicle!;
-            const uuid = this.api.hap.uuid.generate(`${PLATFORM_NAME}:${product.vin}`);
-            const cachedAccessory = this.accessories.find(
-              (accessory) => accessory.UUID === uuid
-            );
-            if (cachedAccessory) {
-              cachedAccessory.context.state = product.state;
-              cachedAccessory.displayName = product.display_name;
-              this.log.debug(
-                "Restoring existing accessory from cache:",
-                cachedAccessory.displayName
-              );
-              new VehicleAccessory(this, cachedAccessory);
-              return;
-            }
+          const newAccessories: PlatformAccessory<VehicleContext | EnergyContext>[] = [];
+          if (scopes.includes("vehicle_device_data")) {
+            //const newVehicleAccessories: PlatformAccessory<VehicleContext>[] = [];
+            vehicles.forEach(async (product) => {
+              this.TeslaFleetApi.vehicle!;
+              const uuid = this.api.hap.uuid.generate(`${PLATFORM_NAME}:${product.vin}`);
+              let accessory = this.accessories.find(
+                (accessory) => accessory.UUID === uuid
+              ) as PlatformAccessory<VehicleContext> | undefined;
 
-            this.log.debug("Adding new accessory:", product.display_name);
-            const newAccessory = new this.api.platformAccessory<VehicleContext>(
-              product.display_name,
-              uuid,
-              Categories.OTHER
-            );
-            newAccessory.context.vin = product.vin;
-            newAccessory.context.state = product.state;
-            newAccessory.displayName = product.display_name;
+              if (accessory) {
+                this.log.debug(
+                  "Restoring existing accessory from cache:",
+                  accessory.displayName
+                );
+              } else {
+                this.log.debug("Adding new accessory:", product.display_name);
+                accessory = new this.api.platformAccessory<VehicleContext>(
+                  product.display_name,
+                  uuid,
+                  Categories.OTHER
+                );
+                newAccessories.push(accessory);
+              }
 
+              accessory.context.vin = product.vin;
+              accessory.context.state = product.state;
+              accessory.displayName = product.display_name;
 
-            new VehicleAccessory(this, newAccessory);
-            newAccessories.push(newAccessory);
-          });
+              new VehicleAccessory(this, accessory);
+            });
+          }
 
-          energy_sites.forEach((product) => { });
+          if (scopes.includes("energy_device_data")) {
+            //const newEnergyAccessories: PlatformAccessory<EnergyContext>[] = [];
+            energy_sites.forEach((product) => {
+              this.TeslaFleetApi.energy!;
+              const uuid = this.api.hap.uuid.generate(`${PLATFORM_NAME}:${product.id}`);
+              let accessory = this.accessories.find(
+                (accessory) => accessory.UUID === uuid
 
+              ) as PlatformAccessory<EnergyContext> | undefined;
 
-        }).then(() => this.api.registerPlatformAccessories(
-          PLUGIN_NAME,
-          PLATFORM_NAME,
-          newAccessories
-        ));
+              if (accessory) {
+                this.log.debug(
+                  "Restoring existing accessory from cache:",
+                  accessory.displayName
+                );
+              } else {
+                this.log.debug("Adding new accessory:", product.site_name);
+                accessory = new this.api.platformAccessory<EnergyContext>(
+                  product.site_name,
+                  uuid,
+                  Categories.OTHER
+                )
+                newAccessories.push(accessory);
+              }
+
+              accessory.context.id = product.energy_site_id;
+              accessory.context.battery = product.components.battery;
+              accessory.context.grid = product.components.grid;
+              accessory.context.solar = product.components.solar;
+              accessory.displayName = product.site_name;
+
+              new EnergyAccessory(this, accessory);
+            })
+          }
+
+          return newAccessories
+
+        }).then((newAccessories) => {
+          this.api.registerPlatformAccessories(
+            PLUGIN_NAME,
+            PLATFORM_NAME,
+            newAccessories
+          )
+        })
     });
   }
 
@@ -102,7 +142,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
    * This function is invoked when homebridge restores cached accessories from disk at startup.
    * It should be used to set up event handlers for characteristics and update respective values.
    */
-  configureAccessory(accessory: PlatformAccessory<VehicleContext>) {
+  configureAccessory(accessory: PlatformAccessory<VehicleContext | EnergyContext>) {
     this.log.debug("Loading accessory from cache:", accessory.displayName);
 
     // add the restored accessory to the accessories cache, so we can track if it has already been registered
