@@ -7,10 +7,13 @@ import {
 import {
   SiteInfoResponse
 } from "tesla-fleet-api/dist/types/site_info.js";
+import { Autonomous } from "./energy-services/autonomous.js";
+import { ChargeFromGrid } from "./energy-services/changefromgrid.js";
+import { ExportBattery } from "./energy-services/exportbattery.js";
+import { StormWatch } from "./energy-services/stormwatch.js";
 import { TeslaFleetApiPlatform } from "./platform.js";
 import { REFRESH_INTERVAL } from "./settings.js";
 import { EventEmitter } from "./utils/event.js";
-import { ChargeFromGrid } from "./energy-services/changefromgrid.js";
 
 export type EnergyContext = {
   id: number;
@@ -43,8 +46,13 @@ export class EnergyAccessory {
     this.emitter = new EventEmitter();
 
     // Create services
-    if (this.accessory.context.battery) {
+    if (this.accessory.context.battery && this.accessory.context.grid && this.accessory.context.solar) {
       new ChargeFromGrid(this);
+      new ExportBattery(this);
+    }
+    if (this.accessory.context.battery && this.accessory.context.grid) {
+      new StormWatch(this);
+      new Autonomous(this);
     }
 
     // Get data and schedule refresh

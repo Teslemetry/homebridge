@@ -15,32 +15,9 @@ export class BatteryService extends BaseService {
       .getCharacteristic(this.parent.platform.Characteristic.StatusLowBattery);
 
     this.parent.emitter.on("live_status", (data) => {
-      batteryLevel.updateValue(this.getLevel(data));
-      chargingState.updateValue(this.getChargingState(data));
-      lowBattery.updateValue(this.getLowBattery(data));
+      batteryLevel.updateValue(data.percentage_charged ?? 50);
+      chargingState.updateValue((data.battery_power ?? 0) < 0 ? 1 : 0);
+      lowBattery.updateValue((data.percentage_charged ?? 50) <= 20);
     });
-  }
-
-  getLevel(data): number {
-    return data.charge_state?.battery_level ?? 50;
-  }
-
-  getChargingState(data): number {
-    switch (data.charge_state?.charging_state) {
-      case "Starting":
-        return this.parent.platform.Characteristic.ChargingState.CHARGING;
-      case "Charging":
-        return this.parent.platform.Characteristic.ChargingState.CHARGING;
-      case "Disconnected":
-        return this.parent.platform.Characteristic.ChargingState.NOT_CHARGEABLE;
-      case "NoPower":
-        return this.parent.platform.Characteristic.ChargingState.NOT_CHARGEABLE;
-      default:
-        return this.parent.platform.Characteristic.ChargingState.NOT_CHARGING;
-    }
-  }
-
-  getLowBattery(data): boolean {
-    return this.getLevel(data) <= 20;
   }
 }

@@ -3,13 +3,14 @@ import { BaseService } from "./base.js";
 
 export class ChargeFromGrid extends BaseService {
   constructor(parent: EnergyAccessory) {
-    super(parent, parent.platform.Service.Switch, "Charge From Grid", "chargefromgrid");
+    super(parent, parent.platform.Service.Switch, "Charge From Grid", "charge_from_grid");
 
     const on = this.service
       .getCharacteristic(this.parent.platform.Characteristic.On)
       .onSet(async (value) => {
         if (typeof value === "boolean") {
-          await this.energy.grid_import_export().then(() => on.updateValue(value));
+          // This switch is the inverse of the API value
+          await this.energy.grid_import_export(!value).then(() => on.updateValue(value));
         }
       });
 
