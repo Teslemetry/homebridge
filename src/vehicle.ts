@@ -31,12 +31,12 @@ import { WindowService } from "./vehicle-services/windows.js";
 export type VehicleContext = {
   vin: string;
   state: string;
-  charge_state: ChargeState;
+  /*charge_state: ChargeState;
   climate_state: ClimateState;
   drive_state: DriveState;
   gui_settings: GUISettings;
   vehicle_config: VehicleConfig;
-  vehicle_state: VehicleState;
+  vehicle_state: VehicleState;*/
 };
 
 export interface VehicleDataEvent {
@@ -100,10 +100,10 @@ export class VehicleAccessory {
       ])
       .then((data) => {
         this.accessory.context.state = data.state;
-        this.accessory.context.charge_state = data.charge_state;
+        /*this.accessory.context.charge_state = data.charge_state;
         this.accessory.context.climate_state = data.climate_state;
         this.accessory.context.drive_state = data.drive_state;
-        this.accessory.context.vehicle_state = data.vehicle_state;
+        this.accessory.context.vehicle_state = data.vehicle_state;*/
         this.emitter.emit("vehicle_data", data);
       })
       .catch(({ status, data }) => {
