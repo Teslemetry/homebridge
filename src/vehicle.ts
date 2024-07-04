@@ -99,7 +99,7 @@ export class VehicleAccessory {
         "vehicle_state",
       ])
       .then((data) => {
-        this.accessory.context.state = "online";
+        this.accessory.context.state = data.state;
         this.accessory.context.charge_state = data.charge_state;
         this.accessory.context.climate_state = data.climate_state;
         this.accessory.context.drive_state = data.drive_state;
