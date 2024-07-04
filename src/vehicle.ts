@@ -73,32 +73,39 @@ export class VehicleAccessory {
 
     // Get data and schedule refresh
 
-    this.refresh();
+    this.refresh(true);
     setInterval(() => this.refresh(), REFRESH_INTERVAL);
   }
 
-  async refresh(): Promise<void> {
-    this.platform.TeslaFleetApi.state(this.accessory.context.vin)
-      .then((data) => {
-        this.accessory.context.state = data.state;
-        this.emitter.emit("vehicle_data", data);
-      })
+  async refresh(first = false): Promise<void> {
+    return this.platform.TeslaFleetApi.status(this.accessory.context.vin).then((status) => {
+      this.accessory.context.state = status;
+      if (status === "asleep" && !first) {
+        this.emitter.emit("offline");
+        return;
+      }
+      return this.platform.TeslaFleetApi.state(this.accessory.context.vin)
+        .then((data) => {
+          data.state = status;
+          this.accessory.context.charge_state = data.charge_state;
+          this.accessory.context.climate_state = data.climate_state;
+          this.accessory.context.drive_state = data.drive_state;
+          this.accessory.context.vehicle_state = data.vehicle_state;
+          this.emitter.emit("vehicle_data", data);
+        });
+    })
       .catch(({ status, data }) => {
-        if (status === 408) {
-          this.platform.log.debug(`${this.accessory.displayName} is offline`);
-          this.accessory.context.state = "offline";
-          this.emitter.emit("offline");
-          return;
-        }
         if (data?.error) {
           this.platform.log.warn(`${this.accessory.displayName} return status ${status}: ${data.error}`);
           return;
         }
         this.platform.log.error(`${this.accessory.displayName} return status ${status}: ${data}`);
       });
+
   }
 
   async wakeUpAndWait(): Promise<void> {
+    console.log(this.accessory.context.state);
     if (this.accessory.context.state === "online") {
       return Promise.resolve();
     }
