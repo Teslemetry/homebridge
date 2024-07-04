@@ -105,7 +105,6 @@ export class VehicleAccessory {
   }
 
   async wakeUpAndWait(): Promise<void> {
-    console.log(this.accessory.context.state);
     if (this.accessory.context.state === "online") {
       return Promise.resolve();
     }
