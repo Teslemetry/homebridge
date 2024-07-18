@@ -2,13 +2,7 @@ import { PlatformAccessory } from "homebridge";
 
 import { VehicleSpecific } from "tesla-fleet-api";
 import {
-  ChargeState,
-  ClimateState,
-  DriveState,
-  GUISettings,
-  VehicleConfig,
   VehicleDataResponse,
-  VehicleState,
 } from "tesla-fleet-api/dist/types/vehicle_data";
 import { TeslaFleetApiPlatform } from "./platform.js";
 import { REFRESH_INTERVAL } from "./settings.js";
@@ -31,12 +25,6 @@ import { WindowService } from "./vehicle-services/windows.js";
 export type VehicleContext = {
   vin: string;
   state: string;
-  /*charge_state: ChargeState;
-  climate_state: ClimateState;
-  drive_state: DriveState;
-  gui_settings: GUISettings;
-  vehicle_config: VehicleConfig;
-  vehicle_state: VehicleState;*/
 };
 
 export interface VehicleDataEvent {
@@ -100,10 +88,6 @@ export class VehicleAccessory {
       ])
       .then((data) => {
         this.accessory.context.state = data.state;
-        /*this.accessory.context.charge_state = data.charge_state;
-        this.accessory.context.climate_state = data.climate_state;
-        this.accessory.context.drive_state = data.drive_state;
-        this.accessory.context.vehicle_state = data.vehicle_state;*/
         this.emitter.emit("vehicle_data", data);
       })
       .catch(({ status, data }) => {
