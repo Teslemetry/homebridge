@@ -11,6 +11,7 @@ export abstract class BaseService {
   protected accessory: PlatformAccessory<EnergyContext>;
   protected emitter: EventEmitter<EnergyDataEvent>;
   protected energy: EnergySpecific;
+  protected name: string;
 
   constructor(
     protected parent: EnergyAccessory,
@@ -24,17 +25,17 @@ export abstract class BaseService {
     this.emitter = parent.emitter;
     this.energy = parent.energy;
 
-    name = parent.platform.config.prefixName ? `${this.parent.accessory.displayName} ${name}` : name;
+    this.name = parent.platform.config.prefixName ? `${this.parent.accessory.displayName} ${name}` : name;
 
     this.service =
       this.accessory.getServiceById(definition, subtype) ||
-      this.accessory.addService(definition, name, subtype);
+      this.accessory.addService(definition, this.name, subtype);
 
     // Set the configured name if it's not already set since Homekit wont use the display name
     const ConfiguredName = this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName);
     if (!ConfiguredName.value) {
-      this.log.debug(`Configured name changing to ${name}`);
-      ConfiguredName.updateValue(name);
+      this.log.debug(`Configured name changing to ${this.name}`);
+      ConfiguredName.updateValue(this.name);
     }
   }
 }

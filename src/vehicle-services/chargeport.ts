@@ -17,12 +17,15 @@ export class ChargePortService extends BaseService {
             this.vehicle.charge_port_door_close()
               .then(() =>
                 currentState.updateValue(1)
-              ) :
+              )
+              .catch((e) => this.log.error(`${this.name} vehicle charge_port_door_close failed: ${e}`))
+            :
             this.vehicle.charge_port_door_open()
               .then(() =>
                 currentState.updateValue(0)
               )
-        );
+              .catch((e) => this.log.error(`${this.name} vehicle charge_port_door_open failed: ${e}`))
+        )
       });
 
     this.parent.emitter.on("vehicle_data", (data) => {

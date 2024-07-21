@@ -10,7 +10,8 @@ export class ChargeSwitchService extends BaseService {
       .onSet(async (value) => {
         this.parent.wakeUpAndWait()
           .then(() => value ? this.parent.vehicle.charge_start() : this.parent.vehicle.charge_stop())
-          .then(() => on.updateValue(value));
+          .then(() => on.updateValue(value))
+          .catch((e) => this.log.error(`${this.name} vehicle charge_start failed: ${e}`));
       });
 
     this.parent.emitter.on("vehicle_data", (data) => {

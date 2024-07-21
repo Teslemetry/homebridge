@@ -8,7 +8,9 @@ export class ExportBattery extends BaseService {
     const on = this.service
       .getCharacteristic(this.parent.platform.Characteristic.On)
       .onSet(async (value) => {
-        await this.energy.grid_import_export(null, value ? "battery_ok" : "pv_only").then(() => on.updateValue(value));
+        await this.energy.grid_import_export(null, value ? "battery_ok" : "pv_only")
+          .then(() => on.updateValue(value))
+          .catch((e) => this.log.error(`${this.name} energy grid_import_export failed: ${e}`));
       });
 
     this.parent.emitter.on("site_info", (data) => {

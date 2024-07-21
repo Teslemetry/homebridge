@@ -1,12 +1,18 @@
 // https://developers.homebridge.io/#/service/AccessoryInformation
 
-import { Service } from "homebridge";
+import { Logging, Service } from "homebridge";
 import { VehicleAccessory } from "../vehicle.js";
 
 export class AccessoryInformationService {
   service: Service;
+  name: string;
+  log: Logging;
+
 
   constructor(private parent: VehicleAccessory) {
+    this.name = this.parent.accessory.displayName
+    this.log = this.parent.platform.log;
+
     this.service = this.parent.accessory.getService(this.parent.platform.Service.AccessoryInformation)!
       .setCharacteristic(
         this.parent.platform.Characteristic.Manufacturer,
@@ -38,6 +44,8 @@ export class AccessoryInformationService {
   }
 
   async setIdentify(): Promise<void> {
-    await this.parent.wakeUpAndWait().then(() => this.parent.vehicle.flash_lights());
+    await this.parent.wakeUpAndWait()
+      .then(() => this.parent.vehicle.flash_lights())
+      .catch((e) => this.log.error(`${this.name} vehicle flash_lights failed: ${e}`));
   }
 }

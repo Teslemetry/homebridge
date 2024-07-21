@@ -15,7 +15,8 @@ export class SentryService extends BaseService {
         target.updateValue(value);
         await this.parent.wakeUpAndWait()
           .then(() => this.vehicle.set_sentry_mode(value !== 3))
-          .then(() => current.updateValue(value));
+          .then(() => current.updateValue(value))
+          .catch((e) => this.log.error(`${this.name} vehicle set_sentry_mode failed: ${e}`))
       });
 
     this.parent.emitter.on("vehicle_data", (data) => {

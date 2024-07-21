@@ -15,9 +15,12 @@ export class LockService extends BaseService {
         await this.parent.wakeUpAndWait().then(() =>
           value ?
             this.parent.vehicle.door_lock()
-              .then(() => currentState.updateValue(1)) :
+              .then(() => currentState.updateValue(1))
+              .catch((e) => this.log.error(`${this.name} vehicle door_lock failed: ${e}`))
+            :
             this.parent.vehicle.door_unlock()
               .then(() => currentState.updateValue(0))
+              .catch((e) => this.log.error(`${this.name} vehicle door_unlock failed: ${e}`))
         );
       });
 

@@ -19,7 +19,8 @@ export class HomelinkService extends BaseService {
             .then(() => {
               current.updateValue(false);
               target.updateValue(false);
-            });
+            })
+            .catch((e) => this.log.error(`${this.name} vehicle actuate_truck failed: ${e}`))
         }
       })
       .updateValue(this.platform.Characteristic.TargetDoorState.CLOSED);

@@ -27,12 +27,14 @@ export class ClimateService extends BaseService {
         );
         await this.parent.wakeUpAndWait()
           .then(() => value
-            ? this.vehicle.auto_conditioning_start().then(
-              () => currentState.updateValue(this.assumedState)
-            )
-            : this.vehicle.auto_conditioning_stop().then(
-              () => currentState.updateValue(this.parent.platform.Characteristic.CurrentHeatingCoolingState.OFF)
-            ));
+            ? this.vehicle.auto_conditioning_start()
+              .then(() => currentState.updateValue(this.assumedState))
+              .catch((e) => this.log.error(`${this.name} vehicle auto_conditioning_start failed: ${e}`))
+            :
+            this.vehicle.auto_conditioning_stop()
+              .then(() => currentState.updateValue(this.parent.platform.Characteristic.CurrentHeatingCoolingState.OFF))
+              .catch((e) => this.log.error(`${this.name} vehicle auto_conditioning_stop failed: ${e}`))
+          );
       });
 
     const currentTemp = this.service

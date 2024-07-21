@@ -8,7 +8,9 @@ export class StormWatch extends BaseService {
     const on = this.service
       .getCharacteristic(this.parent.platform.Characteristic.On)
       .onSet(async (value) => {
-        await this.energy.storm_mode(!!value).then(() => on.updateValue(value));
+        await this.energy.storm_mode(!!value)
+          .then(() => on.updateValue(value))
+          .catch((e) => this.log.error(`${this.name} energy storm_mode failed: ${e}`));
       });
 
     this.parent.emitter.on("site_info", (data) => {

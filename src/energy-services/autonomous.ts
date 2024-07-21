@@ -8,7 +8,9 @@ export class Autonomous extends BaseService {
     const on = this.service
       .getCharacteristic(this.parent.platform.Characteristic.On)
       .onSet(async (value) => {
-        await this.energy.operation(value ? "autonomous" : "self_consumption").then(() => on.updateValue(value));
+        await this.energy.operation(value ? "autonomous" : "self_consumption")
+          .then(() => on.updateValue(value))
+          .catch((e) => this.log.error(`${this.name} energy operation failed: ${e}`));
       });
 
     this.parent.emitter.on("site_info", (data) => {

@@ -41,6 +41,7 @@ export class WindowService extends BaseService {
 
     await this.parent.wakeUpAndWait()
       .then(() => this.parent.vehicle.window_control(value === 100 ? "vent" : "close", this.latitude, this.longitude))
-      .then(() => characteristic.updateValue(value));
+      .then(() => characteristic.updateValue(value))
+      .catch((e) => this.log.error(`${this.name} vehicle window_control failed: ${e}`))
   }
 }

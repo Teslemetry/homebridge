@@ -10,7 +10,9 @@ export class ChargeFromGrid extends BaseService {
       .onSet(async (value) => {
         if (typeof value === "boolean") {
           // This switch is the inverse of the API value
-          await this.energy.grid_import_export(!value).then(() => on.updateValue(value));
+          await this.energy.grid_import_export(!value)
+            .then(() => on.updateValue(value))
+            .catch((e) => this.log.error(`${this.name} energy grid import export failed: ${e}`));
         }
       });
 

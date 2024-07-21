@@ -30,6 +30,7 @@ export class ChargeCurrentService extends BaseService {
 
     await this.parent.wakeUpAndWait()
       .then(() => this.parent.vehicle.set_charging_amps(value))
-      .then(() => characteristic.updateValue(value));
+      .then(() => characteristic.updateValue(value))
+      .catch((e) => this.log.error(`${this.name} vehicle set_charging_amps failed: ${e}`));
   }
 }

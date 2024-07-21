@@ -30,6 +30,7 @@ export class ChargeLimitService extends BaseService {
     value = Math.max(this.min, Math.min(this.max, value as number));
     await this.parent.wakeUpAndWait()
       .then(() => this.vehicle.set_charge_limit(value))
-      .then(() => characteristic.updateValue(value));
+      .then(() => characteristic.updateValue(value))
+      .catch((e) => this.log.error(`${this.name} vehicle set_charge_limit failed: ${e}`));
   }
 }
