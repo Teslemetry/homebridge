@@ -10,7 +10,7 @@ export class AccessoryInformationService {
 
 
   constructor(private parent: VehicleAccessory) {
-    this.name = this.parent.accessory.displayName
+    this.name = this.parent.accessory.displayName;
     this.log = this.parent.platform.log;
 
     this.service = this.parent.accessory.getService(this.parent.platform.Service.AccessoryInformation)!

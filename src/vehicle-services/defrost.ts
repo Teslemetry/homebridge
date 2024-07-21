@@ -11,7 +11,7 @@ export class DefrostService extends BaseService {
         await this.parent.wakeUpAndWait()
           .then(() => this.vehicle.set_preconditioning_max(value as boolean, false))
           .then(() => on.updateValue(value))
-          .catch((e) => this.log.error(`${this.name} vehicle set_preconditioning_max failed: ${e}`))
+          .catch((e) => this.log.error(`${this.name} vehicle set_preconditioning_max failed: ${e}`));
       });
 
     this.parent.emitter.on("vehicle_data", (data) => {

@@ -11,7 +11,7 @@ export class WakeService extends BaseService {
         if (value) {
           await this.parent.wakeUpAndWait()
             .then(() => on.updateValue(true))
-            .catch((e) => this.log.error(`${this.name} vehicle wake_up failed: ${e}`))
+            .catch((e) => this.log.error(`${this.name} vehicle wake_up failed: ${e}`));
         }
       });
 

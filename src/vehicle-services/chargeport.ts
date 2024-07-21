@@ -25,7 +25,7 @@ export class ChargePortService extends BaseService {
                 currentState.updateValue(0)
               )
               .catch((e) => this.log.error(`${this.name} vehicle charge_port_door_open failed: ${e}`))
-        )
+        );
       });
 
     this.parent.emitter.on("vehicle_data", (data) => {
