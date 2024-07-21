@@ -15,7 +15,7 @@ export class BackupReserve extends BaseService {
         debounce((value) => this.energy.backup(value)
           .then(() => level.updateValue(value))
           .catch((e) => this.log.error(`${this.name} vehicle backup failed: ${e}`)),
-          3000));
+        3000));
 
     this.parent.emitter.on("site_info", (data) => {
       on.updateValue(data.backup_reserve_percent > 0);
