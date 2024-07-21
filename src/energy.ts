@@ -8,7 +8,8 @@ import {
   SiteInfoResponse
 } from "tesla-fleet-api/dist/types/site_info.js";
 import { Autonomous } from "./energy-services/autonomous.js";
-import { ChargeFromGrid } from "./energy-services/changefromgrid.js";
+import { BackupReserve } from "./energy-services/backupreserve.js";
+import { ChargeFromGrid } from "./energy-services/chargefromgrid.js";
 import { ExportBattery } from "./energy-services/exportbattery.js";
 import { StormWatch } from "./energy-services/stormwatch.js";
 import { TeslaFleetApiPlatform } from "./platform.js";
@@ -51,6 +52,7 @@ export class EnergyAccessory {
       new ExportBattery(this);
     }
     if (this.accessory.context.battery && this.accessory.context.grid) {
+      new BackupReserve(this);
       new StormWatch(this);
       new Autonomous(this);
     }
