@@ -87,10 +87,6 @@ export class VehicleAccessory {
       return this.platform.TeslaFleetApi.state(this.accessory.context.vin)
         .then((data) => {
           data.state = status;
-          this.accessory.context.charge_state = data.charge_state;
-          this.accessory.context.climate_state = data.climate_state;
-          this.accessory.context.drive_state = data.drive_state;
-          this.accessory.context.vehicle_state = data.vehicle_state;
           this.emitter.emit("vehicle_data", data);
         });
     })
