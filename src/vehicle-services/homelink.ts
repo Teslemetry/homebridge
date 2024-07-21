@@ -20,7 +20,7 @@ export class HomelinkService extends BaseService {
               current.updateValue(false);
               target.updateValue(false);
             })
-            .catch((e) => this.log.error(`${this.name} vehicle actuate_truck failed: ${e}`))
+            .catch((e) => this.log.error(`${this.name} vehicle trigger_homelink failed: ${e}`))
         }
       })
       .updateValue(this.platform.Characteristic.TargetDoorState.CLOSED);
