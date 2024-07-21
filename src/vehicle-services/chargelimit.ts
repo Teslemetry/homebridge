@@ -2,6 +2,7 @@ import { Characteristic, CharacteristicValue } from "homebridge";
 import { debounce } from "../utils/debounce.js";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
+import { wait } from "../utils/wait.js";
 
 export class ChargeLimitService extends BaseService {
 
@@ -30,6 +31,7 @@ export class ChargeLimitService extends BaseService {
     value = Math.max(this.min, Math.min(this.max, value as number));
     await this.parent.wakeUpAndWait()
       .then(() => this.vehicle.set_charge_limit(value))
+      //.then(() => wait())
       .then(() => characteristic.updateValue(value))
       .catch((e) => this.log.error(`${this.name} vehicle set_charge_limit failed: ${e}`));
   }

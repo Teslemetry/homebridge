@@ -1,3 +1,4 @@
+import { wait } from "../utils/wait.js";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
 
@@ -11,15 +12,19 @@ export class LockService extends BaseService {
     const targetState = this.service
       .getCharacteristic(this.parent.platform.Characteristic.LockTargetState)
       .onSet(async (value) => {
+        console.log(value)
+        this.service.setCharacteristic(this.parent.platform.Characteristic.LockTargetState, value)
         targetState.updateValue(value);
         await this.parent.wakeUpAndWait().then(() =>
           value ?
             this.parent.vehicle.door_lock()
-              .then(() => currentState.updateValue(1))
+              //.then(() => wait())
+              .then(() => currentState.updateValue(value))
               .catch((e) => this.log.error(`${this.name} vehicle door_lock failed: ${e}`))
             :
             this.parent.vehicle.door_unlock()
-              .then(() => currentState.updateValue(0))
+              //.then(() => wait())
+              .then(() => currentState.updateValue(value))
               .catch((e) => this.log.error(`${this.name} vehicle door_unlock failed: ${e}`))
         );
       });
