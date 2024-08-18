@@ -26,12 +26,14 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
   public readonly TeslaFleetApi: Teslemetry;
 
   // this is used to track restored cached accessories
-  public readonly accessories: PlatformAccessory<VehicleContext | EnergyContext>[] = [];
+  public readonly accessories: PlatformAccessory<
+    VehicleContext | EnergyContext
+  >[] = [];
 
   constructor(
     public readonly log: Logging,
     public readonly config: PlatformConfig,
-    public readonly api: API
+    public readonly api: API,
   ) {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
@@ -56,29 +58,40 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
 
       this.TeslaFleetApi.metadata()
         .then(({ scopes }) =>
-          this.TeslaFleetApi.products_by_type()
-            .then(async ({ vehicles, energy_sites }) => {
-              const newAccessories: PlatformAccessory<VehicleContext | EnergyContext>[] = [];
+          this.TeslaFleetApi.products_by_type().then(
+            async ({ vehicles, energy_sites }) => {
+              const newAccessories: PlatformAccessory<
+                VehicleContext | EnergyContext
+              >[] = [];
               if (scopes.includes("vehicle_device_data")) {
                 //const newVehicleAccessories: PlatformAccessory<VehicleContext>[] = [];
                 vehicles.forEach(async (product) => {
+                  if (this.config?.ignore_vin?.includes(product.vin)) {
+                    this.log.info("Ignoring vehicle", product.vin);
+                    return;
+                  }
                   this.TeslaFleetApi.vehicle!;
-                  const uuid = this.api.hap.uuid.generate(`${PLATFORM_NAME}:${product.vin}`);
+                  const uuid = this.api.hap.uuid.generate(
+                    `${PLATFORM_NAME}:${product.vin}`,
+                  );
                   let accessory = this.accessories.find(
-                    (accessory) => accessory.UUID === uuid
+                    (accessory) => accessory.UUID === uuid,
                   ) as PlatformAccessory<VehicleContext> | undefined;
 
                   if (accessory) {
                     this.log.debug(
                       "Restored existing accessory from cache:",
-                      accessory.displayName
+                      accessory.displayName,
                     );
                   } else {
-                    this.log.debug("Adding new accessory:", product.display_name);
+                    this.log.debug(
+                      "Adding new accessory:",
+                      product.display_name,
+                    );
                     accessory = new this.api.platformAccessory<VehicleContext>(
                       product.display_name,
                       uuid,
-                      Categories.OTHER
+                      Categories.OTHER,
                     );
                     newAccessories.push(accessory);
                   }
@@ -94,24 +107,34 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
               if (scopes.includes("energy_device_data")) {
                 //const newEnergyAccessories: PlatformAccessory<EnergyContext>[] = [];
                 energy_sites.forEach((product) => {
+                  if (
+                    this.config?.ignore_site?.includes(product.asset_site_id)
+                  ) {
+                    this.log.info(
+                      "Ignoring energy site",
+                      product.energy_site_id,
+                    );
+                    return;
+                  }
                   this.TeslaFleetApi.energy!;
-                  const uuid = this.api.hap.uuid.generate(`${PLATFORM_NAME}:${product.id}`);
+                  const uuid = this.api.hap.uuid.generate(
+                    `${PLATFORM_NAME}:${product.id}`,
+                  );
                   let accessory = this.accessories.find(
-                    (accessory) => accessory.UUID === uuid
-
+                    (accessory) => accessory.UUID === uuid,
                   ) as PlatformAccessory<EnergyContext> | undefined;
 
                   if (accessory) {
                     this.log.debug(
                       "Restoring existing accessory from cache:",
-                      accessory.displayName
+                      accessory.displayName,
                     );
                   } else {
                     this.log.debug("Adding new accessory:", product.site_name);
                     accessory = new this.api.platformAccessory<EnergyContext>(
                       product.site_name,
                       uuid,
-                      Categories.OTHER
+                      Categories.OTHER,
                     );
                     newAccessories.push(accessory);
                   }
@@ -127,16 +150,21 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
               }
 
               return newAccessories;
-
-            })).then((newAccessories) => {
-              this.api.registerPlatformAccessories(
-                PLUGIN_NAME,
-                PLATFORM_NAME,
-                newAccessories
-              );
-            }, (error) => {
-              this.log.error(error?.data?.error ?? error);
-            });
+            },
+          ),
+        )
+        .then(
+          (newAccessories) => {
+            this.api.registerPlatformAccessories(
+              PLUGIN_NAME,
+              PLATFORM_NAME,
+              newAccessories,
+            );
+          },
+          (error) => {
+            this.log.error(error?.data?.error ?? error);
+          },
+        );
     });
   }
 
@@ -144,7 +172,9 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
    * This function is invoked when homebridge restores cached accessories from disk at startup.
    * It should be used to set up event handlers for characteristics and update respective values.
    */
-  configureAccessory(accessory: PlatformAccessory<VehicleContext | EnergyContext>) {
+  configureAccessory(
+    accessory: PlatformAccessory<VehicleContext | EnergyContext>,
+  ) {
     this.log.debug("Loading accessory from cache:", accessory.displayName);
 
     // add the restored accessory to the accessories cache, so we can track if it has already been registered
@@ -156,7 +186,5 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
    * Accessories must only be registered once, previously created accessories
    * must not be registered again to prevent "duplicate UUID" errors.
    */
-  discoverDevices() {
-
-  }
+  discoverDevices() {}
 }

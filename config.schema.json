@@ -35,6 +35,22 @@
         "type": "string",
         "default": "",
         "description": "Longitude of your Homelink device. Required to use Homelink."
+      },
+      "ignore_vin": {
+        "title": "Ignore Vehicles",
+        "type": "array",
+        "items": {
+          "title": "VIN",
+          "type": "string"
+        }
+      },
+      "ignore_site": {
+        "title": "Ignore Energy Site",
+        "type": "array",
+        "items": {
+          "title": "Site ID",
+          "type": "number"
+        }
       }
     }
   }
