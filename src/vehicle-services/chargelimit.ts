@@ -2,18 +2,22 @@ import { Characteristic, CharacteristicValue } from "homebridge";
 import { debounce } from "../utils/debounce.js";
 import { VehicleAccessory } from "../vehicle.js";
 import { BaseService } from "./base.js";
-import { wait } from "../utils/wait.js";
 
 export class ChargeLimitService extends BaseService {
-
   min: number = 50;
   max: number = 100;
 
   constructor(parent: VehicleAccessory) {
-    super(parent, parent.platform.Service.Lightbulb, "Charge Limit", "charge_limit");
+    super(
+      parent,
+      parent.platform.Service.Lightbulb,
+      "Charge Limit",
+      "charge_limit",
+    );
 
-    const on = this.service
-      .getCharacteristic(this.parent.platform.Characteristic.On);
+    const on = this.service.getCharacteristic(
+      this.parent.platform.Characteristic.On,
+    );
 
     const level = this.service
       .getCharacteristic(this.parent.platform.Characteristic.Brightness)
@@ -27,12 +31,18 @@ export class ChargeLimitService extends BaseService {
     });
   }
 
-  async setLevel(value: CharacteristicValue, characteristic: Characteristic): Promise<void> {
+  async setLevel(
+    value: CharacteristicValue,
+    characteristic: Characteristic,
+  ): Promise<void> {
     value = Math.max(this.min, Math.min(this.max, value as number));
-    await this.parent.wakeUpAndWait()
+    await this.parent
+      .wakeUpAndWait()
       .then(() => this.vehicle.set_charge_limit(value))
       //.then(() => wait())
       .then(() => characteristic.updateValue(value))
-      .catch((e) => this.log.error(`${this.name} vehicle set_charge_limit failed: ${e}`));
+      .catch((e) =>
+        this.log.error(`${this.name} vehicle set_charge_limit failed: ${e}`),
+      );
   }
 }
