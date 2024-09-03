@@ -143,7 +143,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
                   accessory.context.battery = product.components.battery;
                   accessory.context.grid = product.components.grid;
                   accessory.context.solar = product.components.solar;
-                  accessory.displayName = product.site_name;
+                  accessory.displayName = product.site_name ?? "Tesla Energy";
 
                   new EnergyAccessory(this, accessory);
                 });
