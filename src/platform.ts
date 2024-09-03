@@ -98,7 +98,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
 
                   accessory.context.vin = product.vin;
                   accessory.context.state = product.state;
-                  accessory.displayName = product.display_name;
+                  accessory.displayName = product.display_name ?? "Tesla";
 
                   new VehicleAccessory(this, accessory);
                 });
