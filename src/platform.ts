@@ -71,7 +71,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
                     return;
                   }
                   this.TeslaFleetApi.vehicle!;
-                  product.display_name ??= "Tesla";
+                  const name = product.display_name || "Tesla";
                   const uuid = this.api.hap.uuid.generate(
                     `${PLATFORM_NAME}:${product.vin}`,
                   );
@@ -85,12 +85,9 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
                       accessory.displayName,
                     );
                   } else {
-                    this.log.debug(
-                      "Adding new accessory:",
-                      product.display_name,
-                    );
+                    this.log.debug("Adding new accessory:", name);
                     accessory = new this.api.platformAccessory<VehicleContext>(
-                      product.display_name,
+                      name,
                       uuid,
                       Categories.OTHER,
                     );
@@ -99,7 +96,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
 
                   accessory.context.vin = product.vin;
                   accessory.context.state = product.state;
-                  accessory.displayName = product.display_name;
+                  accessory.displayName = name;
 
                   new VehicleAccessory(this, accessory);
                 });
@@ -118,8 +115,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
                     return;
                   }
                   this.TeslaFleetApi.energy!;
-                  product.site_name ??= "Tesla Energy";
-
+                  const name = product.site_name || "Tesla Energy";
                   const uuid = this.api.hap.uuid.generate(
                     `${PLATFORM_NAME}:${product.id}`,
                   );
@@ -133,9 +129,9 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
                       accessory.displayName,
                     );
                   } else {
-                    this.log.debug("Adding new accessory:", product.site_name);
+                    this.log.debug("Adding new accessory:", name);
                     accessory = new this.api.platformAccessory<EnergyContext>(
-                      product.site_name,
+                      name,
                       uuid,
                       Categories.OTHER,
                     );
@@ -146,7 +142,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
                   accessory.context.battery = product.components.battery;
                   accessory.context.grid = product.components.grid;
                   accessory.context.solar = product.components.solar;
-                  accessory.displayName = product.site_name;
+                  accessory.displayName = name;
 
                   new EnergyAccessory(this, accessory);
                 });
