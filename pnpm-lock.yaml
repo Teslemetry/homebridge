@@ -25,7 +25,7 @@ importers:
         specifier: ^8.57.0
         version: 8.57.1
       homebridge:
-        specifier: ^1.8.2
+        specifier: ^1.9.0
         version: 1.9.0
       nodemon:
         specifier: ^3.1.2
