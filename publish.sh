@@ -1,11 +1,4 @@
 set -e
-
-git checkout teslemetry
 rm -r dist
 npm publish
-
-git checkout tessie
-rm -r dist
-npm publish
-
-git checkout dev
+gh release create v$(node -p "require('./package.json').version") --repo Bre77/homebridge-tessie
