@@ -25,7 +25,8 @@
   },
   "keywords": [
     "homebridge-plugin",
-    "tesla"
+    "tesla",
+    "tessie"
   ],
   "devDependencies": {
     "@types/node": "^20.12.13",
