@@ -16,8 +16,12 @@ export class BatteryService extends BaseService {
 
     this.parent.emitter.on("live_status", (data) => {
       batteryLevel.updateValue(data.percentage_charged ?? 50);
-      chargingState.updateValue((data.battery_power ?? 0) < 0 ? 1 : 0);
-      lowBattery.updateValue((data.percentage_charged ?? 50) <= 20);
+      chargingState.updateValue((data.battery_power ?? 0) < 0 
+        ? this.parent.platform.hap.Characteristic.ChargingState.CHARGING 
+        : this.parent.platform.hap.Characteristic.ChargingState.NOT_CHARGING);
+      lowBattery.updateValue((data.percentage_charged ?? 50) <= 20 
+        ? this.parent.platform.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW 
+        : this.parent.platform.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL);
     });
   }
 }

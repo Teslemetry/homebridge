@@ -7,7 +7,7 @@ export class HomelinkService extends BaseService {
 
     const current = this.service
       .getCharacteristic(this.platform.Characteristic.CurrentDoorState)
-      .updateValue(this.platform.Characteristic.CurrentDoorState.CLOSED);
+      .updateValue(this.platform.hap.Characteristic.CurrentDoorState.CLOSED);
 
     const target = this.service
       .getCharacteristic(this.platform.Characteristic.TargetDoorState)
@@ -23,7 +23,7 @@ export class HomelinkService extends BaseService {
             .catch((e) => this.log.error(`${this.name} vehicle trigger_homelink failed: ${e}`));
         }
       })
-      .updateValue(this.platform.Characteristic.TargetDoorState.CLOSED);
+      .updateValue(this.platform.hap.Characteristic.TargetDoorState.CLOSED);
 
   }
 }

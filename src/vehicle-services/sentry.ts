@@ -11,16 +11,19 @@ export class SentryService extends BaseService {
     const target = this.service
       .getCharacteristic(this.parent.platform.Characteristic.SecuritySystemTargetState)
       .onSet(async (value) => {
-        value = value === 3 ? 3 : 1;
+        const disarmed = this.parent.platform.hap.Characteristic.SecuritySystemTargetState.DISARM;
+        value = value === disarmed ? disarmed : this.parent.platform.hap.Characteristic.SecuritySystemTargetState.STAY_ARM;
         target.updateValue(value);
         await this.parent.wakeUpAndWait()
-          .then(() => this.vehicle.set_sentry_mode(value !== 3))
+          .then(() => this.vehicle.set_sentry_mode(value !== disarmed))
           .then(() => current.updateValue(value))
           .catch((e) => this.log.error(`${this.name} vehicle set_sentry_mode failed: ${e}`));
       });
 
     this.parent.emitter.on("vehicle_data", (data) => {
-      const value = data.vehicle_state.sentry_mode ? 1 : 3;
+      const value = data.vehicle_state.sentry_mode
+        ? this.parent.platform.hap.Characteristic.SecuritySystemCurrentState.STAY_ARM
+        : this.parent.platform.hap.Characteristic.SecuritySystemCurrentState.DISARMED;
       current.updateValue(value);
       target.updateValue(value);
     });

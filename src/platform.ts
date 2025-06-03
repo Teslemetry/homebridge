@@ -24,6 +24,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service;
   public readonly Characteristic: typeof Characteristic;
   public readonly TeslaFleetApi: Teslemetry;
+  public readonly hap: API['hap'];
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory<
@@ -37,6 +38,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
   ) {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
+    this.hap = api.hap;
 
     this.TeslaFleetApi = new Teslemetry(this.config.accessToken);
 

@@ -22,8 +22,8 @@ export class ClimateService extends BaseService {
       )
       .onSet(async (value) => {
         targetState.updateValue(value ?
-          this.parent.platform.Characteristic.TargetHeatingCoolingState.AUTO :
-          this.parent.platform.Characteristic.TargetHeatingCoolingState.OFF
+          this.parent.platform.hap.Characteristic.TargetHeatingCoolingState.AUTO :
+          this.parent.platform.hap.Characteristic.TargetHeatingCoolingState.OFF
         );
         await this.parent.wakeUpAndWait()
           .then(() => value
@@ -32,7 +32,7 @@ export class ClimateService extends BaseService {
               .catch((e) => this.log.error(`${this.name} vehicle auto_conditioning_start failed: ${e}`))
             :
             this.vehicle.auto_conditioning_stop()
-              .then(() => currentState.updateValue(this.parent.platform.Characteristic.CurrentHeatingCoolingState.OFF))
+              .then(() => currentState.updateValue(this.parent.platform.hap.Characteristic.CurrentHeatingCoolingState.OFF))
               .catch((e) => this.log.error(`${this.name} vehicle auto_conditioning_stop failed: ${e}`))
           );
       });
@@ -56,17 +56,17 @@ export class ClimateService extends BaseService {
 
     this.parent.emitter.on("vehicle_data", (data) => {
       this.assumedState = data.climate_state.inside_temp < data.climate_state.driver_temp_setting
-        ? this.platform.Characteristic.CurrentHeatingCoolingState.HEAT
-        : this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
+        ? this.platform.hap.Characteristic.CurrentHeatingCoolingState.HEAT
+        : this.platform.hap.Characteristic.CurrentHeatingCoolingState.COOL;
 
       if (data.climate_state.is_climate_on) {
         // On
         currentState.updateValue(this.assumedState);
-        targetState.updateValue(this.platform.Characteristic.TargetHeatingCoolingState.AUTO);
+        targetState.updateValue(this.platform.hap.Characteristic.TargetHeatingCoolingState.AUTO);
       } else {
         // Off
-        currentState.updateValue(this.platform.Characteristic.CurrentHeatingCoolingState.OFF);
-        targetState.updateValue(this.platform.Characteristic.TargetHeatingCoolingState.OFF);
+        currentState.updateValue(this.platform.hap.Characteristic.CurrentHeatingCoolingState.OFF);
+        targetState.updateValue(this.platform.hap.Characteristic.TargetHeatingCoolingState.OFF);
       }
 
       currentTemp.updateValue(data.climate_state.inside_temp);

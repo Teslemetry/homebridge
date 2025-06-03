@@ -28,15 +28,15 @@ export class BatteryService extends BaseService {
   getChargingState(data): number {
     switch (data.charge_state?.charging_state) {
       case "Starting":
-        return this.parent.platform.Characteristic.ChargingState.CHARGING;
+        return this.parent.platform.hap.Characteristic.ChargingState.CHARGING;
       case "Charging":
-        return this.parent.platform.Characteristic.ChargingState.CHARGING;
+        return this.parent.platform.hap.Characteristic.ChargingState.CHARGING;
       case "Disconnected":
-        return this.parent.platform.Characteristic.ChargingState.NOT_CHARGEABLE;
+        return this.parent.platform.hap.Characteristic.ChargingState.NOT_CHARGEABLE;
       case "NoPower":
-        return this.parent.platform.Characteristic.ChargingState.NOT_CHARGEABLE;
+        return this.parent.platform.hap.Characteristic.ChargingState.NOT_CHARGEABLE;
       default:
-        return this.parent.platform.Characteristic.ChargingState.NOT_CHARGING;
+        return this.parent.platform.hap.Characteristic.ChargingState.NOT_CHARGING;
     }
   }
 
