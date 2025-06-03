@@ -27,9 +27,9 @@ export class BatteryService extends BaseService {
       lowBattery.updateValue(
         (data.percentage_charged ?? 50) <= 20
           ? this.parent.platform.hap.Characteristic.StatusLowBattery
-              .BATTERY_LEVEL_LOW
+            .BATTERY_LEVEL_LOW
           : this.parent.platform.hap.Characteristic.StatusLowBattery
-              .BATTERY_LEVEL_NORMAL,
+            .BATTERY_LEVEL_NORMAL,
       );
     });
   }
