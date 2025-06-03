@@ -25,16 +25,15 @@ export class ClimateService extends BaseService {
           this.parent.platform.hap.Characteristic.TargetHeatingCoolingState.AUTO :
           this.parent.platform.hap.Characteristic.TargetHeatingCoolingState.OFF
         );
-        await this.parent.wakeUpAndWait()
-          .then(() => value
-            ? this.vehicle.auto_conditioning_start()
-              .then(() => currentState.updateValue(this.assumedState))
-              .catch((e) => this.log.error(`${this.name} vehicle auto_conditioning_start failed: ${e}`))
-            :
-            this.vehicle.auto_conditioning_stop()
-              .then(() => currentState.updateValue(this.parent.platform.hap.Characteristic.CurrentHeatingCoolingState.OFF))
-              .catch((e) => this.log.error(`${this.name} vehicle auto_conditioning_stop failed: ${e}`))
-          );
+        if (value) {
+          await this.vehicle.auto_conditioning_start()
+            .then(() => currentState.updateValue(this.assumedState))
+            .catch((e) => this.log.error(`${this.name} vehicle auto_conditioning_start failed: ${e}`));
+        } else {
+          await this.vehicle.auto_conditioning_stop()
+            .then(() => currentState.updateValue(this.parent.platform.hap.Characteristic.CurrentHeatingCoolingState.OFF))
+            .catch((e) => this.log.error(`${this.name} vehicle auto_conditioning_stop failed: ${e}`));
+        }
       });
 
     const currentTemp = this.service
@@ -43,8 +42,7 @@ export class ClimateService extends BaseService {
     const targetTemp = this.service
       .getCharacteristic(this.parent.platform.Characteristic.TargetTemperature)
       .onSet(async (value) => {
-        await this.parent.wakeUpAndWait()
-          .then(() => this.vehicle.set_temps(value as number, value as number))
+        await this.vehicle.set_temps(value as number, value as number)
           .then(() => targetTemp.updateValue(value));
       });
 

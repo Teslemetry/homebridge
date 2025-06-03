@@ -33,8 +33,7 @@ export class DoorService extends BaseService {
           (!this.open && value > 50) ||
           (this.open && value < 50 && this.trunk === "rear")
         ) {
-          await this.parent.wakeUpAndWait()
-            .then(() => this.parent.vehicle.actuate_truck(this.trunk))
+          await this.parent.vehicle.actuate_truck(this.trunk)
             .then(() => currentPosition.updateValue(value))
             .catch((e) => this.log.error(`${this.name} vehicle actuate_truck failed: ${e}`));
         }

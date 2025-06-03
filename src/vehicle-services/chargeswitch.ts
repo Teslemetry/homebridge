@@ -8,8 +8,7 @@ export class ChargeSwitchService extends BaseService {
     const on = this.service
       .getCharacteristic(this.parent.platform.Characteristic.On)
       .onSet(async (value) => {
-        this.parent.wakeUpAndWait()
-          .then(() => value ? this.parent.vehicle.charge_start() : this.parent.vehicle.charge_stop())
+        await (value ? this.parent.vehicle.charge_start() : this.parent.vehicle.charge_stop())
           .then(() => on.updateValue(value))
           .catch((e) => this.log.error(`${this.name} vehicle charge_start failed: ${e}`));
       });

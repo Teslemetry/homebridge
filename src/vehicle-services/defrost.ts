@@ -8,8 +8,7 @@ export class DefrostService extends BaseService {
     const on = this.service
       .getCharacteristic(this.parent.platform.Characteristic.On)
       .onSet(async (value) => {
-        await this.parent.wakeUpAndWait()
-          .then(() => this.vehicle.set_preconditioning_max(value as boolean, false))
+        await this.vehicle.set_preconditioning_max(value as boolean, false)
           .then(() => on.updateValue(value))
           .catch((e) => this.log.error(`${this.name} vehicle set_preconditioning_max failed: ${e}`));
       });

@@ -1,9 +1,7 @@
 import { PlatformAccessory } from "homebridge";
 
 import { VehicleSpecific } from "tesla-fleet-api";
-import {
-  VehicleDataResponse,
-} from "tesla-fleet-api/dist/types/vehicle_data";
+import { VehicleDataResponse } from "tesla-fleet-api/dist/types/vehicle_data";
 import { TeslaFleetApiPlatform } from "./platform.js";
 import { REFRESH_INTERVAL } from "./settings.js";
 import { EventEmitter } from "./utils/event.js";
@@ -38,14 +36,14 @@ export class VehicleAccessory {
 
   constructor(
     public readonly platform: TeslaFleetApiPlatform,
-    public readonly accessory: PlatformAccessory<VehicleContext>
+    public readonly accessory: PlatformAccessory<VehicleContext>,
   ) {
     if (!this.platform.TeslaFleetApi?.vehicle) {
       throw new Error("TeslaFleetApi not initialized");
     }
 
     this.vehicle = this.platform.TeslaFleetApi.vehicle.specific(
-      this.accessory.context.vin
+      this.accessory.context.vin,
     );
 
     this.emitter = new EventEmitter();
@@ -98,29 +96,14 @@ export class VehicleAccessory {
           return;
         }
         if (data?.error) {
-          this.platform.log.warn(`${this.accessory.displayName} return status ${status}: ${data.error}`);
+          this.platform.log.warn(
+            `${this.accessory.displayName} return status ${status}: ${data.error}`,
+          );
           return;
         }
-        this.platform.log.error(`${this.accessory.displayName} return status ${status}: ${data}`);
+        this.platform.log.error(
+          `${this.accessory.displayName} return status ${status}: ${data}`,
+        );
       });
-  }
-
-  async wakeUpAndWait(): Promise<void> {
-    if (this.accessory.context.state === "online") {
-      return Promise.resolve();
-    }
-    await this.vehicle.wake_up();
-
-    let interval = 2000;
-    for (let x = 0; x < 5; x++) {
-      await new Promise((resolve) => setTimeout(resolve, interval));
-      const { state } = await this.vehicle.vehicle();
-      this.accessory.context.state = state;
-      if (state === "online") {
-        return Promise.resolve();
-      }
-      interval = interval + 2000;
-    }
-    return Promise.reject("Vehicle didn't wake up");
   }
 }

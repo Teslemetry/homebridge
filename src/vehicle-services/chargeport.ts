@@ -12,20 +12,15 @@ export class ChargePortService extends BaseService {
       .getCharacteristic(this.parent.platform.Characteristic.LockTargetState)
       .onSet(async (value) => {
         targetState.updateValue(value);
-        await this.parent.wakeUpAndWait().then(() =>
-          value === 1 ?
-            this.vehicle.charge_port_door_close()
-              .then(() =>
-                currentState.updateValue(1)
-              )
-              .catch((e) => this.log.error(`${this.name} vehicle charge_port_door_close failed: ${e}`))
-            :
-            this.vehicle.charge_port_door_open()
-              .then(() =>
-                currentState.updateValue(0)
-              )
-              .catch((e) => this.log.error(`${this.name} vehicle charge_port_door_open failed: ${e}`))
-        );
+        if (value === 1) {
+          await this.vehicle.charge_port_door_close()
+            .then(() => currentState.updateValue(1))
+            .catch((e) => this.log.error(`${this.name} vehicle charge_port_door_close failed: ${e}`));
+        } else {
+          await this.vehicle.charge_port_door_open()
+            .then(() => currentState.updateValue(0))
+            .catch((e) => this.log.error(`${this.name} vehicle charge_port_door_open failed: ${e}`));
+        }
       });
 
     this.parent.emitter.on("vehicle_data", (data) => {

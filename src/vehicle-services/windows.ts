@@ -39,8 +39,7 @@ export class WindowService extends BaseService {
     value = Math.round(value as number / 100) * 100;
     this.log.debug("Setting windows to", value);
 
-    await this.parent.wakeUpAndWait()
-      .then(() => this.parent.vehicle.window_control(value === 100 ? "vent" : "close", this.latitude, this.longitude))
+    this.parent.vehicle.window_control(value === 100 ? "vent" : "close", this.latitude, this.longitude)
       .then(() => characteristic.updateValue(value))
       .catch((e) => this.log.error(`${this.name} vehicle window_control failed: ${e}`));
   }

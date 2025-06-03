@@ -36,9 +36,7 @@ export class ChargeLimitService extends BaseService {
     characteristic: Characteristic,
   ): Promise<void> {
     value = Math.max(this.min, Math.min(this.max, value as number));
-    await this.parent
-      .wakeUpAndWait()
-      .then(() => this.vehicle.set_charge_limit(value))
+    await this.vehicle.set_charge_limit(value)
       //.then(() => wait())
       .then(() => characteristic.updateValue(value))
       .catch((e) =>

@@ -14,8 +14,7 @@ export class HomelinkService extends BaseService {
       .onSet(async (value) => {
         if (value) {
           target.updateValue(value);
-          await this.parent.wakeUpAndWait()
-            .then(() => this.vehicle.trigger_homelink(this.platform.config.latitude, this.platform.config.longitude))
+          await this.vehicle.trigger_homelink(this.platform.config.latitude, this.platform.config.longitude)
             .then(() => {
               current.updateValue(false);
               target.updateValue(false);

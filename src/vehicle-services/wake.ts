@@ -9,9 +9,12 @@ export class WakeService extends BaseService {
       .getCharacteristic(this.parent.platform.Characteristic.On)
       .onSet(async (value) => {
         if (value) {
-          await this.parent.wakeUpAndWait()
+          await this.vehicle
+            .wake_up()
             .then(() => on.updateValue(true))
-            .catch((e) => this.log.error(`${this.name} vehicle wake_up failed: ${e}`));
+            .catch((e) =>
+              this.log.error(`${this.name} vehicle wake_up failed: ${e}`),
+            );
         }
       });
 

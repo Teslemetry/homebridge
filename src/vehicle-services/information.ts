@@ -44,8 +44,7 @@ export class AccessoryInformationService {
   }
 
   async setIdentify(): Promise<void> {
-    await this.parent.wakeUpAndWait()
-      .then(() => this.parent.vehicle.flash_lights())
+    await this.parent.vehicle.flash_lights()
       .catch((e) => this.log.error(`${this.name} vehicle flash_lights failed: ${e}`));
   }
 }

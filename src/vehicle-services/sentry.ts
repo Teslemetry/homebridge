@@ -14,8 +14,7 @@ export class SentryService extends BaseService {
         const disarmed = this.parent.platform.hap.Characteristic.SecuritySystemTargetState.DISARM;
         value = value === disarmed ? disarmed : this.parent.platform.hap.Characteristic.SecuritySystemTargetState.STAY_ARM;
         target.updateValue(value);
-        await this.parent.wakeUpAndWait()
-          .then(() => this.vehicle.set_sentry_mode(value !== disarmed))
+        this.vehicle.set_sentry_mode(value !== disarmed)
           .then(() => current.updateValue(value))
           .catch((e) => this.log.error(`${this.name} vehicle set_sentry_mode failed: ${e}`));
       });
