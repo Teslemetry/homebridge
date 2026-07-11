@@ -59,113 +59,139 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
       // run the method to discover / register your devices as accessories
 
       this.TeslaFleetApi.metadata()
-        .then(({ scopes }) =>
-          this.TeslaFleetApi.products_by_type().then(
-            async ({ vehicles, energy_sites }) => {
-              const newAccessories: PlatformAccessory<
-                VehicleContext | EnergyContext
-              >[] = [];
-              if (scopes.includes("vehicle_device_data")) {
-                //const newVehicleAccessories: PlatformAccessory<VehicleContext>[] = [];
-                vehicles.forEach(async (product) => {
-                  if (this.config?.ignore_vin?.includes(product.vin)) {
-                    this.log.info("Ignoring vehicle", product.vin);
-                    return;
-                  }
-                  this.TeslaFleetApi.vehicle!;
-                  const name = product.display_name || "Tesla";
-                  const uuid = this.api.hap.uuid.generate(
-                    `${PLATFORM_NAME}:${product.vin}`,
-                  );
-                  let accessory = this.accessories.find(
-                    (accessory) => accessory.UUID === uuid,
-                  ) as PlatformAccessory<VehicleContext> | undefined;
-
-                  if (accessory) {
-                    this.log.debug(
-                      "Restored existing accessory from cache:",
-                      accessory.displayName,
+        .catch((error) => {
+          const { status, data } = error ?? {};
+          this.log.error(
+            data?.error
+              ? `Teslemetry metadata request failed (status ${status}): ${data.error}`
+              : `Teslemetry metadata request failed: ${error}`,
+          );
+          return null;
+        })
+        .then((metadata) => {
+          if (!metadata) {
+            return null;
+          }
+          const { scopes } = metadata;
+          return this.TeslaFleetApi.products_by_type()
+            .catch((error) => {
+              const { status, data } = error ?? {};
+              this.log.error(
+                data?.error
+                  ? `Teslemetry products request failed (status ${status}): ${data.error}`
+                  : `Teslemetry products request failed: ${error}`,
+              );
+              return null;
+            })
+            .then(
+              async (products) => {
+                if (!products) {
+                  return null;
+                }
+                const { vehicles, energy_sites } = products;
+                const newAccessories: PlatformAccessory<
+                  VehicleContext | EnergyContext
+                >[] = [];
+                if (scopes.includes("vehicle_device_data")) {
+                  //const newVehicleAccessories: PlatformAccessory<VehicleContext>[] = [];
+                  vehicles.forEach(async (product) => {
+                    if (this.config?.ignore_vin?.includes(product.vin)) {
+                      this.log.info("Ignoring vehicle", product.vin);
+                      return;
+                    }
+                    this.TeslaFleetApi.vehicle!;
+                    const name = product.display_name || "Tesla";
+                    const uuid = this.api.hap.uuid.generate(
+                      `${PLATFORM_NAME}:${product.vin}`,
                     );
-                  } else {
-                    this.log.debug("Adding new accessory:", name);
-                    accessory = new this.api.platformAccessory<VehicleContext>(
-                      name,
-                      uuid,
-                      Categories.OTHER,
+                    let accessory = this.accessories.find(
+                      (accessory) => accessory.UUID === uuid,
+                    ) as PlatformAccessory<VehicleContext> | undefined;
+
+                    if (accessory) {
+                      this.log.debug(
+                        "Restored existing accessory from cache:",
+                        accessory.displayName,
+                      );
+                    } else {
+                      this.log.debug("Adding new accessory:", name);
+                      accessory =
+                        new this.api.platformAccessory<VehicleContext>(
+                          name,
+                          uuid,
+                          Categories.OTHER,
+                        );
+                      newAccessories.push(accessory);
+                    }
+
+                    accessory.context.vin = product.vin;
+                    accessory.context.state = product.state;
+                    accessory.displayName = name;
+
+                    new VehicleAccessory(this, accessory);
+                  });
+                }
+
+                if (scopes.includes("energy_device_data")) {
+                  //const newEnergyAccessories: PlatformAccessory<EnergyContext>[] = [];
+                  energy_sites.forEach((product) => {
+                    if (
+                      this.config?.ignore_site?.includes(product.asset_site_id)
+                    ) {
+                      this.log.info(
+                        "Ignoring energy site",
+                        product.energy_site_id,
+                      );
+                      return;
+                    }
+                    this.TeslaFleetApi.energy!;
+                    const name = product.site_name || "Tesla Energy";
+                    const uuid = this.api.hap.uuid.generate(
+                      `${PLATFORM_NAME}:${product.id}`,
                     );
-                    newAccessories.push(accessory);
-                  }
+                    let accessory = this.accessories.find(
+                      (accessory) => accessory.UUID === uuid,
+                    ) as PlatformAccessory<EnergyContext> | undefined;
 
-                  accessory.context.vin = product.vin;
-                  accessory.context.state = product.state;
-                  accessory.displayName = name;
+                    if (accessory) {
+                      this.log.debug(
+                        "Restoring existing accessory from cache:",
+                        accessory.displayName,
+                      );
+                    } else {
+                      this.log.debug("Adding new accessory:", name);
+                      accessory =
+                        new this.api.platformAccessory<EnergyContext>(
+                          name,
+                          uuid,
+                          Categories.OTHER,
+                        );
+                      newAccessories.push(accessory);
+                    }
 
-                  new VehicleAccessory(this, accessory);
-                });
-              }
+                    accessory.context.id = product.energy_site_id;
+                    accessory.context.battery = product.components.battery;
+                    accessory.context.grid = product.components.grid;
+                    accessory.context.solar = product.components.solar;
+                    accessory.displayName = name;
 
-              if (scopes.includes("energy_device_data")) {
-                //const newEnergyAccessories: PlatformAccessory<EnergyContext>[] = [];
-                energy_sites.forEach((product) => {
-                  if (
-                    this.config?.ignore_site?.includes(product.asset_site_id)
-                  ) {
-                    this.log.info(
-                      "Ignoring energy site",
-                      product.energy_site_id,
-                    );
-                    return;
-                  }
-                  this.TeslaFleetApi.energy!;
-                  const name = product.site_name || "Tesla Energy";
-                  const uuid = this.api.hap.uuid.generate(
-                    `${PLATFORM_NAME}:${product.id}`,
-                  );
-                  let accessory = this.accessories.find(
-                    (accessory) => accessory.UUID === uuid,
-                  ) as PlatformAccessory<EnergyContext> | undefined;
+                    new EnergyAccessory(this, accessory);
+                  });
+                }
 
-                  if (accessory) {
-                    this.log.debug(
-                      "Restoring existing accessory from cache:",
-                      accessory.displayName,
-                    );
-                  } else {
-                    this.log.debug("Adding new accessory:", name);
-                    accessory = new this.api.platformAccessory<EnergyContext>(
-                      name,
-                      uuid,
-                      Categories.OTHER,
-                    );
-                    newAccessories.push(accessory);
-                  }
-
-                  accessory.context.id = product.energy_site_id;
-                  accessory.context.battery = product.components.battery;
-                  accessory.context.grid = product.components.grid;
-                  accessory.context.solar = product.components.solar;
-                  accessory.displayName = name;
-
-                  new EnergyAccessory(this, accessory);
-                });
-              }
-
-              return newAccessories;
-            },
-          ),
-        )
-        .then(
-          (newAccessories) => {
+                return newAccessories;
+              },
+            );
+        })
+        .then((newAccessories) => {
+          if (newAccessories) {
             this.api.registerPlatformAccessories(
               PLUGIN_NAME,
               PLATFORM_NAME,
               newAccessories,
             );
-          },
-          (error) => {
-            this.log.error(error?.data?.error ?? error);
-          },
-        );
+          }
+        });
     });
   }
 
