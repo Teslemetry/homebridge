@@ -42,7 +42,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
 
     this.TeslaFleetApi = new Teslemetry(this.config.accessToken);
 
-    this.log.debug("Finished initializing platform:", this.config.accessToken);
+    this.log.debug("Finished initializing platform, accessToken configured:", !!this.config.accessToken);
 
     // Homebridge 1.8.0 introduced a `log.success` method that can be used to log success messages
     // For users that are on a version prior to 1.8.0, we need a 'polyfill' for this method
