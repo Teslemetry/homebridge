@@ -9,30 +9,39 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # the Node.js versions to build on
-        node-version: [18.x, 20.x]
+        # Supported Node.js versions per the "engines" field in package.json
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }} 
-        uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: pnpm
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
 
       - name: Lint the project
-        run: npm run lint
+        run: pnpm run lint
 
-      - name: Build the project
-        run: npm run build
+      - name: Compile TypeScript
+        run: pnpm run build
 
-      - name: List, audit, fix outdated dependencies and build again
+      - name: Run tests
+        run: pnpm test
+
+      - name: Inspect package tarball
         run: |
-          npm list --outdated
-          npm audit || true  # ignore failures
-          npm audit fix || true
-          npm list --outdated
-          npm run build
+          pnpm pack
+          tar -tzf *.tgz | sort
+          tar -tzf *.tgz | grep -q '^package/dist/index.js$'
+          rm -f *.tgz
+
+      - name: Audit dependencies (advisory only)
+        if: matrix.node-version == '20.x'
+        run: pnpm audit || true
