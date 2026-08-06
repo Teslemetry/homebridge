@@ -1,0 +1,67 @@
+name: Publish
+
+on:
+  push:
+    branches: [dev, teslemetry, tessie]
+    paths: [package.json]
+
+permissions:
+  contents: write
+
+jobs:
+  gate:
+    uses: ./.github/workflows/build.yml
+
+  publish:
+    needs: gate
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Compile TypeScript
+        run: pnpm run build
+
+      - name: Check if this version is already published
+        id: check
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        if: steps.check.outputs.published == 'false'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release
+        if: steps.check.outputs.published == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.check.outputs.name }}-v${{ steps.check.outputs.version }}" \
+            --repo "${{ github.repository }}" \
+            --title "${{ steps.check.outputs.name }} v${{ steps.check.outputs.version }}" \
+            --generate-notes
